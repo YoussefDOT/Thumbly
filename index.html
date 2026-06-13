@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Thumbly — YouTube Thumbnail Tester</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
 :root{
-  --font: 'Poppins', system-ui, -apple-system, sans-serif;
+  --font: 'Poppins', system-ui, -apple-system, sans-serif;   /* the app UI */
+  --yt-font: 'Roboto', system-ui, -apple-system, sans-serif; /* the YouTube replica */
   --accent: #ff3a3a;
   --accent-2: #ff7a45;
   --ease: cubic-bezier(.22,1,.36,1);
 }
-/* ---------- App shell theme (independent of the YT preview theme) ---------- */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{
@@ -23,15 +23,13 @@ body{
     radial-gradient(1200px 700px at 12% -10%, #2a1346 0%, transparent 55%),
     radial-gradient(1000px 600px at 110% 10%, #3a0f2a 0%, transparent 50%),
     #0b0b10;
-  color:#f3f3f7;
-  -webkit-font-smoothing:antialiased;
-  overflow:hidden;
+  color:#f3f3f7;-webkit-font-smoothing:antialiased;overflow:hidden;
 }
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-input{font-family:inherit}
+input,textarea{font-family:inherit}
 ::selection{background:var(--accent);color:#fff}
 
-/* ---------- Floating blobs ---------- */
+/* floating blobs */
 .blob{position:fixed;border-radius:50%;filter:blur(70px);opacity:.4;z-index:0;pointer-events:none;animation:float 18s var(--ease) infinite alternate}
 .blob.b1{width:420px;height:420px;background:#7b2ff7;top:-120px;left:-80px}
 .blob.b2{width:360px;height:360px;background:#ff3a6e;bottom:-140px;right:-60px;animation-delay:-6s}
@@ -39,30 +37,15 @@ input{font-family:inherit}
 @keyframes float{to{transform:translate(40px,-30px) scale(1.15)}}
 
 /* ===================== ONBOARDING ===================== */
-.onboard{
-  position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
-  padding:24px;opacity:0;animation:fadeIn .6s var(--ease) forwards;
-}
+.onboard{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;animation:fadeIn .6s var(--ease) forwards}
 .onboard.hide{animation:fadeOut .45s var(--ease) forwards;pointer-events:none}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes fadeOut{to{opacity:0;transform:scale(.98)}}
-.card{
-  position:relative;width:min(480px,100%);
-  background:rgba(22,22,30,.72);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:28px;padding:44px 40px;
-  backdrop-filter:blur(24px) saturate(140%);
-  box-shadow:0 30px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
-  animation:rise .7s var(--ease) both;
-}
+.card{position:relative;width:min(480px,100%);background:rgba(22,22,30,.72);border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:44px 40px;backdrop-filter:blur(24px) saturate(140%);box-shadow:0 30px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);animation:rise .7s var(--ease) both}
 @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
 .logo{display:flex;align-items:center;gap:12px;margin-bottom:26px;animation:pop .6s .15s var(--ease) both}
 @keyframes pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
-.logo .mark{
-  width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
-  background:linear-gradient(135deg,var(--accent),var(--accent-2));
-  box-shadow:0 8px 24px rgba(255,58,58,.45);
-}
+.logo .mark{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 8px 24px rgba(255,58,58,.45)}
 .logo .mark svg{width:26px;height:26px;fill:#fff}
 .logo .name{font-weight:700;font-size:22px;letter-spacing:-.5px}
 .logo .name span{font-weight:300;opacity:.6;font-size:13px;display:block;letter-spacing:0}
@@ -70,39 +53,29 @@ input{font-family:inherit}
 .card p.sub{color:#a9a9b8;font-size:14px;font-weight:300;margin-bottom:26px;line-height:1.5}
 .field{position:relative;margin-bottom:14px}
 .field .at{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:#8a8a99;font-weight:500;pointer-events:none}
-.field input{
-  width:100%;padding:16px 16px 16px 36px;border-radius:16px;
-  background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);
-  color:#fff;font-size:15.5px;font-weight:400;transition:.3s var(--ease);
-}
+.field input{width:100%;padding:16px 16px 16px 36px;border-radius:16px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:#fff;font-size:15.5px;transition:.3s var(--ease)}
 .field input::placeholder{color:#6c6c7a}
 .field input:focus{outline:none;border-color:var(--accent);background:rgba(255,58,58,.08);box-shadow:0 0 0 4px rgba(255,58,58,.12)}
-.btn-primary{
-  width:100%;padding:16px;border-radius:16px;font-weight:600;font-size:15.5px;color:#fff;
-  background:linear-gradient(135deg,var(--accent),var(--accent-2));
-  box-shadow:0 12px 30px rgba(255,58,58,.4);transition:.3s var(--ease);
-  display:flex;align-items:center;justify-content:center;gap:10px;
-}
+.btn-primary{width:100%;padding:16px;border-radius:16px;font-weight:600;font-size:15.5px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 12px 30px rgba(255,58,58,.4);transition:.3s var(--ease);display:flex;align-items:center;justify-content:center;gap:10px}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(255,58,58,.55)}
 .btn-primary:active{transform:translateY(0) scale(.99)}
-.btn-primary:disabled{opacity:.7;cursor:not-allowed;transform:none}
+.btn-primary:disabled{opacity:.85;cursor:default;transform:none}
 .hint{margin-top:14px;font-size:12.5px;color:#7a7a88;font-weight:300;text-align:center;line-height:1.5}
 .hint b{color:#a9a9b8;font-weight:500}
-.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+
+/* progress bar */
+.progress{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:16px;opacity:0;max-height:0;transition:.4s var(--ease)}
+.progress.show{opacity:1;max-height:30px}
+.progress .bar{height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .5s var(--ease);box-shadow:0 0 14px rgba(255,58,58,.6)}
+.prog-label{font-size:12px;color:#9a9aa8;text-align:center;margin-top:9px;font-weight:400;min-height:16px;transition:.3s}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
-.err{color:#ff8a8a;font-size:13px;margin-top:-4px;margin-bottom:12px;min-height:0;overflow:hidden;transition:.3s}
+.err{color:#ff9a9a;font-size:12.5px;margin-top:10px;text-align:center;min-height:0;line-height:1.4}
 
 /* ===================== MAIN APP ===================== */
 .app{position:fixed;inset:0;z-index:10;display:flex;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
 .app.show{opacity:1;pointer-events:auto}
-
-/* ----- Left control panel ----- */
-.panel{
-  width:380px;flex:0 0 380px;height:100%;padding:26px 24px;overflow-y:auto;
-  background:rgba(16,16,22,.6);backdrop-filter:blur(22px);
-  border-right:1px solid rgba(255,255,255,.07);
-  display:flex;flex-direction:column;gap:22px;
-}
+.panel{width:380px;flex:0 0 380px;height:100%;padding:26px 24px;overflow-y:auto;background:rgba(16,16,22,.6);backdrop-filter:blur(22px);border-right:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:20px}
 .panel::-webkit-scrollbar{width:8px}
 .panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
 .panel-head{display:flex;align-items:center;gap:11px}
@@ -110,14 +83,9 @@ input{font-family:inherit}
 .panel-head .mark svg{width:21px;height:21px;fill:#fff}
 .panel-head .name{font-weight:700;font-size:18px;letter-spacing:-.4px;line-height:1}
 .panel-head .name span{display:block;font-weight:300;font-size:11px;opacity:.55;margin-top:2px}
-
-.section{
-  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);
-  border-radius:20px;padding:18px;animation:rise .6s var(--ease) both;
-}
+.section{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:18px;animation:rise .6s var(--ease) both}
 .section .lbl{font-size:11px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;color:#8a8a99;margin-bottom:13px;display:flex;align-items:center;gap:7px}
 
-/* channel chip */
 .chan-chip{display:flex;align-items:center;gap:13px}
 .chan-chip img,.chan-chip .ph{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:0 0 48px;background:linear-gradient(135deg,#555,#333);display:grid;place-items:center;font-weight:600;color:#fff;font-size:18px}
 .chan-chip .meta{min-width:0;flex:1}
@@ -126,11 +94,7 @@ input{font-family:inherit}
 .chan-chip .change{font-size:12px;font-weight:500;color:var(--accent);padding:7px 12px;border-radius:10px;background:rgba(255,58,58,.1);transition:.25s var(--ease);white-space:nowrap}
 .chan-chip .change:hover{background:rgba(255,58,58,.2)}
 
-/* upload dropzone */
-.drop{
-  position:relative;border:2px dashed rgba(255,255,255,.16);border-radius:16px;
-  padding:26px 16px;text-align:center;transition:.3s var(--ease);cursor:pointer;overflow:hidden;
-}
+.drop{position:relative;border:2px dashed rgba(255,255,255,.16);border-radius:16px;padding:26px 16px;text-align:center;transition:.3s var(--ease);cursor:pointer;overflow:hidden}
 .drop:hover{border-color:rgba(255,58,58,.5);background:rgba(255,58,58,.05)}
 .drop.drag{border-color:var(--accent);background:rgba(255,58,58,.1);transform:scale(1.02)}
 .drop.has{padding:0;border-style:solid;border-color:rgba(255,255,255,.1)}
@@ -143,49 +107,46 @@ input{font-family:inherit}
 .drop .replace{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:500;background:rgba(0,0,0,.55);opacity:0;transition:.25s}
 .drop.has:hover .replace{opacity:1}
 .drop .replace svg{width:16px;height:16px;fill:#fff}
-
-.warn{
-  margin-top:11px;display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:500;
-  padding:11px 13px;border-radius:12px;background:rgba(255,176,32,.12);color:#ffcd6b;
-  border:1px solid rgba(255,176,32,.25);max-height:0;opacity:0;overflow:hidden;
-  transition:.4s var(--ease);
-}
-.warn.show{max-height:80px;opacity:1;margin-top:11px}
+.warn{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:500;padding:11px 13px;border-radius:12px;background:rgba(255,176,32,.12);color:#ffcd6b;border:1px solid rgba(255,176,32,.25);max-height:0;opacity:0;overflow:hidden;transition:.4s var(--ease)}
+.warn.show{max-height:90px;opacity:1;margin-top:11px}
 .warn svg{width:17px;height:17px;fill:#ffcd6b;flex:0 0 17px}
 
-/* title input */
-.ti-wrap textarea{
-  width:100%;resize:none;padding:13px 14px;border-radius:14px;line-height:1.4;
-  background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);
-  color:#fff;font-size:14.5px;font-weight:400;transition:.25s var(--ease);min-height:64px;
-}
+.ti-wrap textarea{width:100%;resize:none;padding:13px 14px;border-radius:14px;line-height:1.4;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:#fff;font-size:14.5px;transition:.25s var(--ease);min-height:64px}
 .ti-wrap textarea:focus{outline:none;border-color:var(--accent);background:rgba(255,58,58,.07)}
 .ti-wrap textarea::placeholder{color:#6c6c7a}
-.count{display:flex;justify-content:flex-end;font-size:11px;color:#7a7a88;margin-top:6px;font-weight:400}
+.count{display:flex;justify-content:flex-end;font-size:11px;color:#7a7a88;margin-top:6px}
 .count.warn-c{color:#ffcd6b}
 
-/* theme toggle */
+/* competitor section */
+.comp-add{display:flex;gap:8px;margin-bottom:12px}
+.comp-add input{flex:1;min-width:0;padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:#fff;font-size:13px;transition:.25s}
+.comp-add input:focus{outline:none;border-color:var(--accent);background:rgba(255,58,58,.07)}
+.comp-add input::placeholder{color:#6c6c7a}
+.comp-add .add{flex:0 0 auto;padding:0 15px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-weight:600;font-size:13px;transition:.25s var(--ease)}
+.comp-add .add:hover{filter:brightness(1.08)}
+.comp-add .add:disabled{opacity:.6;cursor:default}
+.comp-list{display:flex;flex-direction:column;gap:8px}
+.comp-item{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);animation:rise .4s var(--ease) both}
+.comp-item img,.comp-item .ph{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:0 0 32px;display:grid;place-items:center;color:#fff;font-weight:600;font-size:13px}
+.comp-item .nm{flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp-item .nm small{display:block;font-weight:300;font-size:11px;color:#8a8a99}
+.comp-item .rm{flex:0 0 auto;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#8a8a99;transition:.2s}
+.comp-item .rm:hover{background:rgba(255,80,80,.15);color:#ff8a8a}
+.comp-item .rm svg{width:14px;height:14px;fill:currentColor}
+.comp-item.loading .nm{color:#8a8a99}
+.comp-empty{font-size:12px;color:#7a7a88;font-weight:300;line-height:1.5;text-align:center;padding:4px 0}
+
 .theme-row{display:flex;gap:10px}
-.theme-btn{
-  flex:1;padding:13px;border-radius:14px;border:1.5px solid rgba(255,255,255,.1);
-  background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;gap:9px;
-  font-size:13.5px;font-weight:500;transition:.28s var(--ease);color:#bdbdcc;
-}
+.theme-btn{flex:1;padding:13px;border-radius:14px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;gap:9px;font-size:13.5px;font-weight:500;transition:.28s var(--ease);color:#bdbdcc}
 .theme-btn svg{width:17px;height:17px;fill:currentColor;transition:.3s}
 .theme-btn:hover{border-color:rgba(255,255,255,.22)}
 .theme-btn.active{border-color:var(--accent);background:rgba(255,58,58,.12);color:#fff}
 .theme-btn.active svg{fill:var(--accent)}
 
-/* ----- Right preview area ----- */
 .stage{flex:1;height:100%;display:flex;flex-direction:column;min-width:0}
-.stage-top{
-  display:flex;align-items:center;gap:8px;padding:18px 26px 14px;flex-wrap:wrap;
-}
+.stage-top{display:flex;align-items:center;gap:8px;padding:18px 26px 14px;flex-wrap:wrap}
 .tabs{display:flex;gap:6px;background:rgba(255,255,255,.05);padding:5px;border-radius:14px;border:1px solid rgba(255,255,255,.07)}
-.tab{
-  padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;color:#a9a9b8;
-  transition:.25s var(--ease);position:relative;white-space:nowrap;
-}
+.tab{padding:9px 16px;border-radius:10px;font-size:13px;font-weight:500;color:#a9a9b8;transition:.25s var(--ease);white-space:nowrap}
 .tab:hover{color:#fff}
 .tab.active{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 6px 16px rgba(255,58,58,.35)}
 .stage-spacer{flex:1}
@@ -193,27 +154,20 @@ input{font-family:inherit}
 .device-pill button{padding:8px 11px;border-radius:9px;color:#a9a9b8;transition:.25s;display:grid;place-items:center}
 .device-pill button svg{width:16px;height:16px;fill:currentColor}
 .device-pill button.active{background:rgba(255,255,255,.12);color:#fff}
-
 .viewport-wrap{flex:1;overflow:auto;padding:0 26px 26px;display:flex;justify-content:center}
 .viewport-wrap::-webkit-scrollbar{width:10px;height:10px}
 .viewport-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
-.viewport{
-  width:100%;max-width:1280px;border-radius:18px;overflow:hidden;
-  box-shadow:0 30px 90px rgba(0,0,0,.5);transition:max-width .5s var(--ease);
-  align-self:flex-start;
-}
+.viewport{width:100%;max-width:1280px;border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.5);transition:max-width .5s var(--ease);align-self:flex-start}
 .viewport.mobile{max-width:400px}
 .view-fade{animation:viewIn .5s var(--ease)}
 @keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
-/* ===================== YOUTUBE REPLICA ===================== */
-/* The replica carries its own theme via .yt[data-yt="light|dark"] */
-.yt{font-family:var(--font);--yt-bg:#0f0f0f;--yt-text:#f1f1f1;--yt-sec:#aaa;--yt-chip:#272727;--yt-chip-active:#f1f1f1;--yt-chip-text:#fff;--yt-chip-active-text:#0f0f0f;--yt-header:#0f0f0f;--yt-hover:#272727;--yt-line:#272727;--yt-skel:#222}
+/* ===================== YOUTUBE REPLICA (Roboto) ===================== */
+.yt{font-family:var(--yt-font);--yt-bg:#0f0f0f;--yt-text:#f1f1f1;--yt-sec:#aaa;--yt-chip:#272727;--yt-chip-active:#f1f1f1;--yt-chip-text:#fff;--yt-chip-active-text:#0f0f0f;--yt-header:#0f0f0f;--yt-hover:#272727;--yt-line:#272727;--yt-skel:#222}
 .yt[data-yt="light"]{--yt-bg:#fff;--yt-text:#0f0f0f;--yt-sec:#606060;--yt-chip:#f2f2f2;--yt-chip-active:#0f0f0f;--yt-chip-text:#0f0f0f;--yt-chip-active-text:#fff;--yt-header:#fff;--yt-hover:#f2f2f2;--yt-line:#e5e5e5;--yt-skel:#f0f0f0}
 .yt{background:var(--yt-bg);color:var(--yt-text);min-height:540px;transition:background .45s var(--ease),color .45s var(--ease)}
 .yt *{transition:background-color .45s var(--ease),color .45s var(--ease),border-color .45s var(--ease)}
 
-/* header */
 .yt-header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:0 16px;height:56px;background:var(--yt-header)}
 .yt-burger{display:grid;gap:4px;padding:8px;cursor:pointer}
 .yt-burger span{display:block;width:18px;height:2px;background:var(--yt-text);border-radius:2px}
@@ -229,42 +183,42 @@ input{font-family:inherit}
 .yt-head-right svg{width:23px;height:23px;fill:var(--yt-text)}
 .yt-head-av{width:32px;height:32px;border-radius:50%;object-fit:cover}
 
-/* layout body */
 .yt-body{display:flex}
-/* mini sidebar (rail) */
 .yt-rail{width:72px;flex:0 0 72px;padding:6px 0;display:flex;flex-direction:column;gap:2px}
 .yt-rail .it{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 0 12px;font-size:10px;color:var(--yt-text);border-radius:10px;margin:0 6px;cursor:pointer}
 .yt-rail .it:hover{background:var(--yt-hover)}
 .yt-rail .it.act{background:var(--yt-hover)}
 .yt-rail .it svg{width:22px;height:22px;fill:var(--yt-text)}
 .yt-main{flex:1;min-width:0}
-
-/* chips bar */
 .yt-chips{display:flex;gap:11px;padding:11px 22px;overflow:hidden;position:sticky;top:56px;background:var(--yt-bg);z-index:4}
 .yt-chip{padding:8px 12px;border-radius:9px;background:var(--yt-chip);color:var(--yt-chip-text);font-size:13px;font-weight:500;white-space:nowrap}
 .yt-chip.on{background:var(--yt-chip-active);color:var(--yt-chip-active-text)}
 
-/* ----- HOME GRID ----- */
+/* HOME GRID */
 .yt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 16px;padding:8px 22px 28px}
 .yt-card{cursor:pointer;animation:cardIn .5s var(--ease) both}
 @keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .yt-thumb{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--yt-skel)}
 .yt-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .yt-thumb .dur{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.8);color:#fff;font-size:12px;font-weight:500;padding:1px 5px;border-radius:5px}
-.yt-card.mine .yt-thumb{box-shadow:0 0 0 3px var(--accent), 0 14px 34px rgba(255,58,58,.3);animation:glow 2.6s ease-in-out infinite}
-@keyframes glow{0%,100%{box-shadow:0 0 0 3px var(--accent),0 14px 30px rgba(255,58,58,.25)}50%{box-shadow:0 0 0 3px var(--accent),0 14px 44px rgba(255,58,58,.5)}}
 .yt-meta{display:flex;gap:12px;padding:12px 2px 0}
 .yt-meta .av{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:0 0 36px;background:#888;display:grid;place-items:center;color:#fff;font-weight:600;font-size:15px}
 .yt-info{min-width:0}
-.yt-title{font-size:14px;font-weight:600;line-height:1.35;color:var(--yt-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;letter-spacing:-.1px}
+.yt-title{font-size:14px;font-weight:500;line-height:1.35;color:var(--yt-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .yt-sub{font-size:12.5px;color:var(--yt-sec);font-weight:400;margin-top:3px;line-height:1.4}
-.yt-sub .vf{display:flex;align-items:center;gap:4px}
 
-/* placeholder thumbnail gradients */
+/* placeholder + skeleton */
 .ph-thumb{width:100%;height:100%;display:grid;place-items:center}
 .ph-thumb svg{width:34px;height:34px;opacity:.5;fill:#fff}
+.skel{position:relative;overflow:hidden;background:var(--yt-skel)}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);animation:shimmer 1.3s infinite}
+.yt[data-yt="light"] .skel::after{background:linear-gradient(90deg,transparent,rgba(0,0,0,.05),transparent)}
+@keyframes shimmer{100%{transform:translateX(100%)}}
+.skel-line{height:12px;border-radius:6px;margin-top:8px}
+.thumb-spin{position:absolute;inset:0;display:grid;place-items:center}
+.thumb-spin div{width:26px;height:26px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
 
-/* ----- WATCH PAGE (sidebar suggestions) ----- */
+/* WATCH PAGE */
 .yt-watch{display:flex;gap:24px;padding:18px 22px 28px}
 .yt-primary{flex:1;min-width:0;max-width:850px}
 .yt-player{width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#000;position:relative}
@@ -272,7 +226,7 @@ input{font-family:inherit}
 .yt-player .play-ov{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.12)}
 .yt-player .play-ov .pbtn{width:64px;height:46px;background:rgba(0,0,0,.7);border-radius:12px;display:grid;place-items:center}
 .yt-player .play-ov .pbtn::after{content:"";border-left:20px solid #fff;border-top:12px solid transparent;border-bottom:12px solid transparent;margin-left:5px}
-.yt-vtitle{font-size:19px;font-weight:600;margin:15px 0 10px;line-height:1.3;color:var(--yt-text)}
+.yt-vtitle{font-size:19px;font-weight:700;margin:15px 0 10px;line-height:1.3;color:var(--yt-text)}
 .yt-vrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .yt-vrow .av{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#888;display:grid;place-items:center;color:#fff;font-weight:600}
 .yt-vrow .cn{font-weight:600;font-size:15px;color:var(--yt-text)}
@@ -285,12 +239,11 @@ input{font-family:inherit}
 .yt-side .sthumb{position:relative;width:168px;flex:0 0 168px;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:var(--yt-skel)}
 .yt-side .sthumb img{width:100%;height:100%;object-fit:cover}
 .yt-side .sthumb .dur{position:absolute;right:4px;bottom:4px;background:rgba(0,0,0,.8);color:#fff;font-size:11px;padding:0 4px;border-radius:4px;font-weight:500}
-.yt-side.mine .sthumb{box-shadow:0 0 0 2.5px var(--accent)}
 .yt-side .sinfo{min-width:0;padding-top:1px}
-.yt-side .st{font-size:13.5px;font-weight:600;line-height:1.3;color:var(--yt-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.yt-side .st{font-size:13.5px;font-weight:500;line-height:1.3;color:var(--yt-text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .yt-side .ss{font-size:12px;color:var(--yt-sec);margin-top:4px;line-height:1.4}
 
-/* ----- CHANNEL PAGE ----- */
+/* CHANNEL PAGE */
 .yt-channel{padding:0 0 28px}
 .yt-banner{height:160px;margin:16px 22px 0;border-radius:14px;background:linear-gradient(120deg,#7b2ff7,#ff3a6e,#ff7a45);position:relative;overflow:hidden}
 .yt-banner::after{content:"";position:absolute;inset:0;background:radial-gradient(600px 200px at 20% 0%,rgba(255,255,255,.25),transparent)}
@@ -300,29 +253,28 @@ input{font-family:inherit}
 .yt-chead .cmeta .h{font-size:14px;color:var(--yt-sec);margin-top:5px;font-weight:500}
 .yt-chead .cmeta .h b{color:var(--yt-text)}
 .yt-chead .cmeta .desc{font-size:13px;color:var(--yt-sec);margin-top:5px}
-.yt-chead .csub{margin-top:13px;padding:10px 18px;border-radius:20px;background:var(--yt-text);color:var(--yt-bg);font-weight:600;font-size:14px}
+.yt-chead .csub{margin-top:13px;padding:10px 18px;border-radius:20px;background:var(--yt-text);color:var(--yt-bg);font-weight:600;font-size:14px;display:inline-block}
 .yt-ctabs{display:flex;gap:26px;padding:6px 30px 0;margin:6px 22px 0;border-bottom:1px solid var(--yt-line)}
 .yt-ctabs .ct{padding:12px 2px;font-size:15px;font-weight:500;color:var(--yt-sec);position:relative}
 .yt-ctabs .ct.on{color:var(--yt-text)}
 .yt-ctabs .ct.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;background:var(--yt-text);border-radius:3px}
 .yt-cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 30px 0}
 .yt-cgrid .yt-title{font-size:13.5px}
+.yt-cnote{padding:14px 30px 0;font-size:13px;color:var(--yt-sec)}
 
-/* ----- SEARCH ----- */
+/* SEARCH */
 .yt-search-results{padding:18px 22px 28px;max-width:1000px}
 .yt-sr{display:flex;gap:16px;margin-bottom:16px;cursor:pointer;animation:cardIn .5s var(--ease) both}
 .yt-sr .srthumb{position:relative;width:360px;flex:0 0 360px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--yt-skel)}
 .yt-sr .srthumb img{width:100%;height:100%;object-fit:cover}
 .yt-sr .srthumb .dur{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.8);color:#fff;font-size:12px;padding:1px 5px;border-radius:5px;font-weight:500}
-.yt-sr.mine .srthumb{box-shadow:0 0 0 3px var(--accent)}
-.yt-sr .srt{font-size:18px;font-weight:500;color:var(--yt-text);line-height:1.3}
+.yt-sr .srt{font-size:18px;font-weight:400;color:var(--yt-text);line-height:1.3}
 .yt-sr .srm{font-size:12.5px;color:var(--yt-sec);margin-top:6px}
 .yt-sr .srchan{display:flex;align-items:center;gap:8px;margin:10px 0}
 .yt-sr .srchan .av{width:24px;height:24px;border-radius:50%;object-fit:cover;background:#888;display:grid;place-items:center;color:#fff;font-size:10px;font-weight:600}
 .yt-sr .srchan span{font-size:12.5px;color:var(--yt-sec)}
 .yt-sr .srd{font-size:12.5px;color:var(--yt-sec);margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-/* responsive of preview grid in mobile mode */
 .viewport.mobile .yt-rail{display:none}
 .viewport.mobile .yt-grid{grid-template-columns:1fr;padding:8px 12px 24px}
 .viewport.mobile .yt-cgrid{grid-template-columns:1fr 1fr;padding:16px 14px 0}
@@ -337,25 +289,18 @@ input{font-family:inherit}
 .viewport.mobile .yt-chead{flex-direction:column;text-align:center;padding-top:16px}
 .viewport.mobile .yt-chead .bigav{width:86px;height:86px;flex-basis:86px;font-size:32px}
 
-.empty-note{text-align:center;color:var(--yt-sec);font-size:13px;padding:8px 22px 0;font-weight:300;font-style:italic}
-
 @media (max-width:1100px){.yt-grid{grid-template-columns:repeat(2,1fr)}.yt-cgrid{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:860px){
-  .panel{position:absolute;z-index:20;box-shadow:0 0 60px rgba(0,0,0,.6)}
-}
+@media (max-width:860px){.panel{position:absolute;z-index:20;box-shadow:0 0 60px rgba(0,0,0,.6)}}
 
-/* toast */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);z-index:50;background:rgba(20,20,28,.92);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(14px);padding:13px 20px;border-radius:14px;font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 16px 40px rgba(0,0,0,.5);transition:transform .5s var(--ease),opacity .5s;opacity:0}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast svg{width:18px;height:18px;fill:#7CFC9E}
 </style>
 </head>
 <body>
-<div class="blob b1"></div>
-<div class="blob b2"></div>
-<div class="blob b3"></div>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 
-<!-- ===================== ONBOARDING ===================== -->
+<!-- ONBOARDING -->
 <div class="onboard" id="onboard">
   <div class="card">
     <div class="logo">
@@ -363,20 +308,21 @@ input{font-family:inherit}
       <div class="name">Thumbly<span>YouTube Thumbnail Tester</span></div>
     </div>
     <h1>Let's load your channel</h1>
-    <p class="sub">Paste your channel handle or name. We'll grab your avatar &amp; name so your thumbnail looks exactly how viewers will see it.</p>
+    <p class="sub">Paste your channel handle, name, or full URL. We'll grab your avatar, name &amp; recent videos so your thumbnail looks exactly how viewers will see it.</p>
     <div class="field">
       <span class="at">@</span>
-      <input id="handleInput" type="text" placeholder="mkbhd" autocomplete="off" spellcheck="false" />
+      <input id="handleInput" type="text" placeholder="mkbhd  ·  or paste a youtube.com link" autocomplete="off" spellcheck="false" />
     </div>
-    <div class="err" id="onbErr"></div>
     <button class="btn-primary" id="loadBtn"><span id="loadLabel">Load my channel</span></button>
-    <p class="hint">Saved to <b>this device</b> only — you won't have to type it again. <br>Tip: paste a <b>@handle</b> for the most accurate match.</p>
+    <div class="progress" id="progress"><div class="bar" id="progBar"></div></div>
+    <div class="prog-label" id="progLabel"></div>
+    <div class="err" id="onbErr"></div>
+    <p class="hint">Saved to <b>this device</b> only — you won't type it again. Works with <b>@handle</b>, channel name, or any <b>youtube.com</b> link.</p>
   </div>
 </div>
 
-<!-- ===================== MAIN APP ===================== -->
+<!-- MAIN APP -->
 <div class="app" id="app">
-  <!-- control panel -->
   <aside class="panel">
     <div class="panel-head">
       <div class="mark"><svg viewBox="0 0 24 24"><path d="M21.6 7.2a2.7 2.7 0 0 0-1.9-1.9C18 4.8 12 4.8 12 4.8s-6 0-7.7.5A2.7 2.7 0 0 0 2.4 7.2 28 28 0 0 0 2 12a28 28 0 0 0 .4 4.8 2.7 2.7 0 0 0 1.9 1.9c1.7.5 7.7.5 7.7.5s6 0 7.7-.5a2.7 2.7 0 0 0 1.9-1.9A28 28 0 0 0 22 12a28 28 0 0 0-.4-4.8zM10 15V9l5.2 3z"/></svg></div>
@@ -388,15 +334,12 @@ input{font-family:inherit}
       <div class="chan-chip">
         <img id="pImg" alt="" style="display:none" />
         <div class="ph" id="pPh"></div>
-        <div class="meta">
-          <div class="cn" id="pName">—</div>
-          <div class="ch" id="pHandle">—</div>
-        </div>
+        <div class="meta"><div class="cn" id="pName">—</div><div class="ch" id="pHandle">—</div></div>
         <button class="change" id="changeChan">Change</button>
       </div>
     </div>
 
-    <div class="section" style="animation-delay:.12s">
+    <div class="section" style="animation-delay:.1s">
       <div class="lbl">Thumbnail</div>
       <div class="drop" id="drop">
         <input type="file" id="fileInput" accept="image/*" hidden />
@@ -406,34 +349,33 @@ input{font-family:inherit}
         <img class="prev" id="thumbPrev" alt="" />
         <div class="replace"><svg viewBox="0 0 24 24"><path d="M19 13v6H5v-6H3v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6h-2zM11 4.83V16h2V4.83l3.59 3.58L18 7l-6-6-6 6 1.41 1.41L11 4.83z"/></svg>Replace image</div>
       </div>
-      <div class="warn" id="sizeWarn">
-        <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-        <span id="warnText"></span>
-      </div>
+      <div class="warn" id="sizeWarn"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg><span id="warnText"></span></div>
     </div>
 
-    <div class="section ti-wrap" style="animation-delay:.19s">
+    <div class="section ti-wrap" style="animation-delay:.15s">
       <div class="lbl">Video title</div>
       <textarea id="titleInput" rows="2" placeholder="Type your video title…" maxlength="100">I Tested Every Thumbnail Trick So You Don't Have To</textarea>
       <div class="count" id="count">0 / 100</div>
     </div>
 
-    <div class="section" style="animation-delay:.26s">
+    <div class="section" style="animation-delay:.2s">
+      <div class="lbl">Compare with channels</div>
+      <div class="comp-add">
+        <input id="compInput" type="text" placeholder="@handle, name or link" autocomplete="off" spellcheck="false" />
+        <button class="add" id="compAdd">Add</button>
+      </div>
+      <div class="comp-list" id="compList"></div>
+    </div>
+
+    <div class="section" style="animation-delay:.25s">
       <div class="lbl">Appearance</div>
       <div class="theme-row">
-        <button class="theme-btn active" data-theme="dark" id="tDark">
-          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.4 5.4 0 0 1-2.4-10.24C13.4 3.04 12.7 3 12 3z"/></svg>
-          Dark
-        </button>
-        <button class="theme-btn" data-theme="light" id="tLight">
-          <svg viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5v3m0 14v3m10-10h-3M5 12H2m15.07-7.07l-2.12 2.12M6.93 17.07l-2.12 2.12m12.26 0l-2.12-2.12M6.93 6.93L4.81 4.81" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-          Light
-        </button>
+        <button class="theme-btn active" data-theme="dark" id="tDark"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.4 5.4 0 0 1-2.4-10.24C13.4 3.04 12.7 3 12 3z"/></svg>Dark</button>
+        <button class="theme-btn" data-theme="light" id="tLight"><svg viewBox="0 0 24 24"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5v3m0 14v3m10-10h-3M5 12H2m15.07-7.07l-2.12 2.12M6.93 17.07l-2.12 2.12m12.26 0l-2.12-2.12M6.93 6.93L4.81 4.81" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>Light</button>
       </div>
     </div>
   </aside>
 
-  <!-- preview stage -->
   <main class="stage">
     <div class="stage-top">
       <div class="tabs" id="tabs">
@@ -449,9 +391,7 @@ input{font-family:inherit}
       </div>
     </div>
     <div class="viewport-wrap">
-      <div class="viewport" id="viewport">
-        <div class="yt" id="yt" data-yt="dark"></div>
-      </div>
+      <div class="viewport" id="viewport"><div class="yt" id="yt" data-yt="dark"></div></div>
     </div>
   </main>
 </div>
@@ -459,411 +399,294 @@ input{font-family:inherit}
 <div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span id="toastText"></span></div>
 
 <script>
-/* ============================================================
-   Thumbly — state
-============================================================ */
-const LS_KEY = 'thumbly.channel.v1';
-const state = {
-  channel: null,          // {name, handle, avatar}
-  thumb: null,            // dataURL
-  title: document.getElementById('titleInput').value,
-  view: 'home',
-  device: 'desktop',
-  theme: 'dark',
-};
+/* ============================================================ state */
+const LS_CH='thumbly.channel.v2', LS_COMP='thumbly.competitors.v2', LS_CACHE='thumbly.cache.v2';
+const state={ channel:null, competitors:[], thumb:null, title:document.getElementById('titleInput').value, view:'home', device:'desktop', theme:'dark' };
+const $=id=>document.getElementById(id);
 
-const $ = id => document.getElementById(id);
+/* ============================================================ helpers */
+function initials(name){ if(!name) return '?'; const p=name.replace(/^@/,'').trim().split(/[\s_\-.]+/).filter(Boolean); return ((p[0]?.[0]||'')+(p[1]?.[0]||'')).toUpperCase()||name[0].toUpperCase(); }
+function colorFor(str){ let h=0; str=str||'x'; for(let i=0;i<str.length;i++) h=str.charCodeAt(i)+((h<<5)-h); const hue=Math.abs(h)%360; return `linear-gradient(135deg,hsl(${hue},65%,52%),hsl(${(hue+40)%360},70%,45%))`; }
+function esc(s){ return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+function fmtViews(n){ n=+n; if(!n) return ''; if(n>=1e6) return (n/1e6).toFixed(n>=1e7?0:1).replace(/\.0$/,'')+'M'; if(n>=1e3) return (n/1e3).toFixed(n>=1e4?0:1).replace(/\.0$/,'')+'K'; return ''+n; }
+function timeAgo(iso){ if(!iso) return ''; const d=(Date.now()-new Date(iso).getTime())/1000; const u=[['year',31536000],['month',2592000],['week',604800],['day',86400],['hour',3600],['minute',60]]; for(const[n,s]of u){const v=Math.floor(d/s);if(v>=1)return `${v} ${n}${v>1?'s':''} ago`;} return 'just now'; }
+const rand=arr=>arr[Math.floor(Math.random()*arr.length)];
 
-/* ============================================================
-   Helpers
-============================================================ */
-function initials(name){
-  if(!name) return '?';
-  const p = name.replace(/^@/,'').trim().split(/[\s_\-.]+/).filter(Boolean);
-  return ((p[0]?.[0]||'') + (p[1]?.[0]||'')).toUpperCase() || name[0].toUpperCase();
+/* video thumbnail from id, with graceful fallback */
+function ytImg(id,cls){ return `<img class="${cls||''}" loading="lazy" src="https://i.ytimg.com/vi/${id}/maxresdefault.jpg" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${id}/mqdefault.jpg'">`; }
+function phThumb(seed){ const hue=(seed*53)%360; return `<div class="ph-thumb" style="background:linear-gradient(135deg,hsl(${hue},55%,42%),hsl(${(hue+50)%360},60%,32%))"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`; }
+function avatarHTML(cls,ch){ ch=ch||state.channel; if(ch?.avatar) return `<img class="${cls}" src="${ch.avatar}" alt="">`; const name=ch?.name||'You'; return `<div class="${cls}" style="background:${colorFor(name)}">${initials(name)}</div>`; }
+function myThumbHTML(){ if(state.thumb) return `<img src="${state.thumb}" alt="thumbnail">`; return `<div class="ph-thumb" style="background:linear-gradient(135deg,#2a2a35,#16161d)"><svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg></div>`; }
+
+/* ============================================================ networking (raced proxies + cache) */
+const PROXIES=[
+  u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
+  u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
+  u=>'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(u),
+];
+function fetchText(url){
+  const tasks=PROXIES.map(make=>{ const c=new AbortController(); const t=setTimeout(()=>c.abort(),9000);
+    return fetch(make(url),{signal:c.signal}).then(r=>{ if(!r.ok) throw new Error('bad'); return r.text(); }).finally(()=>clearTimeout(t)); });
+  return Promise.any(tasks);
 }
-function colorFor(str){
-  let h=0; for(let i=0;i<str.length;i++) h=str.charCodeAt(i)+((h<<5)-h);
-  const hue = Math.abs(h)%360;
-  return `linear-gradient(135deg,hsl(${hue},65%,52%),hsl(${(hue+40)%360},70%,45%))`;
-}
-const VIEWS = ['1.2K','8.4K','45K','120K','340K','1.1M','2.7M','12K','89K','560K','230K','4.5M'];
-const AGES = ['2 hours ago','5 hours ago','1 day ago','3 days ago','1 week ago','2 weeks ago','1 month ago','4 months ago'];
-const DUR = ['10:24','8:01','15:47','22:13','6:38','12:55','18:02','4:19','31:40','9:27'];
-const FAKE_TITLES = [
-  'How I Built a PC in 24 Hours','The Truth About Productivity Apps','I Tried the Viral Morning Routine',
-  'Why Everyone Is Switching to This','10 Things I Wish I Knew Earlier','The Most Underrated Gadget of 2025',
-  'Ranking Every Coffee in My City','This Changed How I Work Forever','Living on $1 for an Entire Week',
-  'The Science of Getting Things Done','Building My Dream Setup From Scratch','What Nobody Tells You About Success'];
-const FAKE_CHANS = ['Tech Unboxed','Daily Dose','The Lab','Creator Corner','Pixel Perfect','Next Level','Studio 9','Bright Ideas','The Workshop','Frame by Frame','Overtime','Deep Dive'];
-const rand = arr => arr[Math.floor(Math.random()*arr.length)];
+function readCacheAll(){ try{ return JSON.parse(localStorage.getItem(LS_CACHE)||'{}'); }catch(e){ return {}; } }
+function readCache(k){ const c=readCacheAll()[k]; if(c && Date.now()-c._t<6*3600*1000) return c.d; return null; }
+function writeCache(k,d){ const all=readCacheAll(); all[k]={_t:Date.now(),d}; try{ localStorage.setItem(LS_CACHE,JSON.stringify(all)); }catch(e){} }
 
-function phThumb(seed){
-  const hue=(seed*53)%360;
-  return `<div class="ph-thumb" style="background:linear-gradient(135deg,hsl(${hue},55%,42%),hsl(${(hue+50)%360},60%,32%))"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;
-}
-
-/* avatar markup (real image or initials) */
-function avatarHTML(cls){
-  const c = state.channel;
-  if(c && c.avatar) return `<img class="${cls}" src="${c.avatar}" alt="" />`;
-  const name = c?.name || 'You';
-  return `<div class="${cls}" style="background:${colorFor(name)}">${initials(name)}</div>`;
-}
-
-/* the user's own video card thumb */
-function myThumbHTML(){
-  if(state.thumb) return `<img src="${state.thumb}" alt="thumbnail" />`;
-  return `<div class="ph-thumb" style="background:linear-gradient(135deg,#2a2a35,#16161d)"><svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg></div>`;
-}
-
-/* ============================================================
-   Channel fetching (best-effort, no API key)
-============================================================ */
-async function fetchChannel(query){
-  const handle = query.replace(/^@/,'').trim();
-  // try several YouTube URL shapes through a CORS proxy
-  const urls = [
-    `https://www.youtube.com/@${handle}`,
-    `https://www.youtube.com/c/${handle}`,
-    `https://www.youtube.com/user/${handle}`,
-  ];
-  for(const u of urls){
-    try{
-      const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u);
-      const res = await fetch(proxied, {cache:'no-store'});
-      if(!res.ok) continue;
-      const html = await res.text();
-      // avatar: og:image is the channel avatar on channel pages
-      const img = html.match(/<meta property="og:image" content="([^"]+)"/);
-      let title = html.match(/<meta property="og:title" content="([^"]+)"/);
-      // sometimes name is in <title>
-      if(!title) title = html.match(/<title>([^<]+)<\/title>/);
-      if(img && img[1] && /yt3\.|ggpht|googleusercontent/.test(img[1])){
-        let name = title ? title[1].replace(/ - YouTube$/,'').trim() : handle;
-        return { name, handle, avatar: img[1] };
-      }
-    }catch(e){ /* try next */ }
+/* parse handle / name / any youtube link */
+function parseInput(raw){
+  let s=(raw||'').trim();
+  const m=s.match(/youtube\.com\/(@[\w.\-]+|channel\/UC[\w-]+|c\/[\w.\-]+|user\/[\w.\-]+)/i);
+  if(m){ const path=m[1];
+    if(path[0]==='@'){ const h=path.slice(1); return {handle:h,value:h,url:'https://www.youtube.com/@'+h}; }
+    if(path.startsWith('channel/')){ const id=path.split('/')[1]; return {handle:id,value:id,url:'https://www.youtube.com/channel/'+id,id}; }
+    const seg=path.split('/')[1]; return {handle:seg,value:seg,url:'https://www.youtube.com/'+path};
   }
-  return null;
+  const h=s.replace(/^@/,'');
+  return {handle:h,value:h,url:'https://www.youtube.com/@'+h};
+}
+function extractChannelId(html){
+  let m=html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/channel\/(UC[\w-]+)"/);
+  if(!m) m=html.match(/"(?:channelId|externalId)":"(UC[\w-]+)"/);
+  return m?m[1]:null;
+}
+function meta(html,prop){ const m=html.match(new RegExp('<meta property="'+prop+'" content="([^"]*)"')); return m?m[1]:null; }
+function parseRSS(xml){
+  const doc=new DOMParser().parseFromString(xml,'application/xml');
+  const entries=doc.getElementsByTagName('entry'); const out=[];
+  for(const e of entries){
+    const id=e.getElementsByTagName('yt:videoId')[0]?.textContent;
+    const title=e.getElementsByTagName('title')[0]?.textContent;
+    const pub=e.getElementsByTagName('published')[0]?.textContent;
+    const views=e.getElementsByTagName('media:statistics')[0]?.getAttribute('views');
+    if(id) out.push({id,title,views,published:pub});
+  }
+  return out;
+}
+async function getChannelData(input,onProgress){
+  const p=parseInput(input);
+  const key='ch:'+p.value.toLowerCase();
+  const cached=readCache(key); if(cached){ onProgress&&onProgress(100,'Loaded from cache'); return cached; }
+  onProgress&&onProgress(30,'Locating channel…');
+  const html=await fetchText(p.url);
+  onProgress&&onProgress(60,'Grabbing avatar & name…');
+  const channelId=p.id||extractChannelId(html);
+  const name=(meta(html,'og:title')||p.value).replace(/ - YouTube$/,'');
+  const avatar=meta(html,'og:image');
+  onProgress&&onProgress(80,'Loading recent videos…');
+  let videos=[];
+  if(channelId){ try{ const xml=await fetchText('https://www.youtube.com/feeds/videos.xml?channel_id='+channelId); videos=parseRSS(xml); }catch(e){} }
+  onProgress&&onProgress(100,'Done');
+  const data={ name, handle:p.handle, avatar:(avatar&&/ggpht|yt3|googleusercontent/.test(avatar))?avatar:null, channelId, videos };
+  writeCache(key,data);
+  return data;
 }
 
-/* ============================================================
-   Render the YouTube replica per view
-============================================================ */
-function ytHeader(){
-  return `
+/* ============================================================ video pools */
+function otherVideos(){
+  // real competitor videos, else my own, else placeholders
+  const pool=[];
+  state.competitors.filter(c=>!c.loading).forEach(c=>{ (c.videos||[]).slice(0,6).forEach(v=>pool.push({...v,ch:c})); });
+  if(pool.length) return shuffle(pool);
+  if(state.channel?.videos?.length) return state.channel.videos.map(v=>({...v,ch:state.channel}));
+  return [];
+}
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ============================================================ replica chrome */
+function ytHeader(){ return `
   <div class="yt-header">
     <div class="yt-burger"><span></span><span></span><span></span></div>
     <div class="yt-logo"><span class="play"></span>YouTube</div>
-    <div class="yt-search">
-      <div class="box">Search</div>
-      <div class="go"><svg viewBox="0 0 24 24"><path d="M20.49 19l-5.73-5.73A6.9 6.9 0 0 0 16 9a7 7 0 1 0-7 7 6.9 6.9 0 0 0 4.27-1.24L19 20.49 20.49 19zM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0z"/></svg></div>
-    </div>
+    <div class="yt-search"><div class="box">Search</div><div class="go"><svg viewBox="0 0 24 24"><path d="M20.49 19l-5.73-5.73A6.9 6.9 0 0 0 16 9a7 7 0 1 0-7 7 6.9 6.9 0 0 0 4.27-1.24L19 20.49 20.49 19zM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0z"/></svg></div></div>
     <div class="yt-head-right">
       <svg viewBox="0 0 24 24"><path d="M14 4l-4 0 0 1.38c-1.16.41-2 1.51-2 2.81v.31l-3 4 0 1.5 14 0 0-1.5-3-4 0-.31c0-1.3-.84-2.4-2-2.81L14 5.38 14 4zm-2 16a2 2 0 0 0 2-2l-4 0a2 2 0 0 0 2 2z"/></svg>
       <svg viewBox="0 0 24 24"><path d="M18 4v5h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H12V4h6z"/><path d="M5 5h4V3H3v6h2V5zm14 14h-4v2h6v-6h-2v4z"/></svg>
       ${avatarHTML('yt-head-av')}
     </div>
-  </div>`;
-}
-function ytRail(activeIcon){
-  const items = [
-    {n:'Home',d:'M10 3.5l-7 6V21h5v-6h4v6h5V9.5l-7-6z'},
-    {n:'Shorts',d:'M10 8.64v6.72L15 12z M17.77 10.32l-1.2-.5 1.05-.49a3 3 0 0 0 1.43-4l-.02-.03a3 3 0 0 0-3.94-1.35L5.6 8.36a3 3 0 0 0-1.42 4l.02.04a3 3 0 0 0 1.79 1.5l1.2.5-1.05.48a3 3 0 0 0-1.43 4l.02.04a3 3 0 0 0 3.95 1.35l9.48-4.4a3 3 0 0 0 1.42-4l-.02-.04a3 3 0 0 0-1.8-1.5z'},
-    {n:'Subs',d:'M10 18l6-4-6-4v8zm10-12H4v2h16V6zm2 4H2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V10z'},
-    {n:'You',d:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3 0-8 1.5-8 4.5V21h16v-2.5c0-3-5-4.5-8-4.5z'},
-  ];
-  return `<div class="yt-rail">` + items.map((it,i)=>`<div class="it ${i===activeIcon?'act':''}"><svg viewBox="0 0 24 24"><path d="${it.d}"/></svg>${it.n}</div>`).join('') + `</div>`;
-}
-function ytChips(set){
-  return `<div class="yt-chips">` + set.map((c,i)=>`<div class="yt-chip ${i===0?'on':''}">${c}</div>`).join('') + `</div>`;
-}
+  </div>`; }
+function ytRail(active){ const items=[{n:'Home',d:'M10 3.5l-7 6V21h5v-6h4v6h5V9.5l-7-6z'},{n:'Shorts',d:'M10 8.64v6.72L15 12z M17.77 10.32l-1.2-.5 1.05-.49a3 3 0 0 0 1.43-4l-.02-.03a3 3 0 0 0-3.94-1.35L5.6 8.36a3 3 0 0 0-1.42 4l.02.04a3 3 0 0 0 1.79 1.5l1.2.5-1.05.48a3 3 0 0 0-1.43 4l.02.04a3 3 0 0 0 3.95 1.35l9.48-4.4a3 3 0 0 0 1.42-4l-.02-.04a3 3 0 0 0-1.8-1.5z'},{n:'Subs',d:'M10 18l6-4-6-4v8zm10-12H4v2h16V6zm2 4H2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V10z'},{n:'You',d:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3 0-8 1.5-8 4.5V21h16v-2.5c0-3-5-4.5-8-4.5z'}];
+  return `<div class="yt-rail">`+items.map((it,i)=>`<div class="it ${i===active?'act':''}"><svg viewBox="0 0 24 24"><path d="${it.d}"/></svg>${it.n}</div>`).join('')+`</div>`; }
+function ytChips(set){ return `<div class="yt-chips">`+set.map((c,i)=>`<div class="yt-chip ${i===0?'on':''}">${c}</div>`).join('')+`</div>`; }
 
-function esc(s){return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+/* skeleton card (loading) */
+function skelCard(delay){ return `<div class="yt-card" style="animation-delay:${delay}s"><div class="yt-thumb skel"><div class="thumb-spin"><div></div></div></div><div class="yt-meta"><div class="av skel" style="border-radius:50%"></div><div class="yt-info" style="flex:1"><div class="skel skel-line" style="width:90%"></div><div class="skel skel-line" style="width:55%"></div></div></div></div>`; }
 
-function cardHTML(opts){
-  // opts: {mine, thumbHTML, title, channel, avatar, views, age, dur}
-  return `
-  <div class="yt-card ${opts.mine?'mine':''}" style="animation-delay:${opts.delay||0}s">
-    <div class="yt-thumb">${opts.thumbHTML}<div class="dur">${opts.dur}</div></div>
-    <div class="yt-meta">
-      ${opts.avatar}
+function gridCard(o){ return `
+  <div class="yt-card" style="animation-delay:${o.delay||0}s">
+    <div class="yt-thumb">${o.thumbHTML}</div>
+    <div class="yt-meta">${o.avatar||''}
       <div class="yt-info">
-        <div class="yt-title">${esc(opts.title)}</div>
-        <div class="yt-sub">${esc(opts.channel)}</div>
-        <div class="yt-sub">${opts.views} views · ${opts.age}</div>
+        <div class="yt-title">${esc(o.title)}</div>
+        ${o.channel!==undefined?`<div class="yt-sub">${esc(o.channel)}</div>`:''}
+        <div class="yt-sub">${o.meta||''}</div>
       </div>
     </div>
-  </div>`;
-}
+  </div>`; }
 
+function vMeta(v){ const parts=[]; const vw=fmtViews(v.views); if(vw) parts.push(vw+' views'); const ag=timeAgo(v.published); if(ag) parts.push(ag); return parts.join(' · '); }
+
+/* ============================================================ views */
 function renderHome(){
-  const cards = [];
-  const myTitle = state.title || 'Your video title goes here';
-  // user card placed prominently (2nd position is realistic top row)
-  const myCard = {mine:true, thumbHTML:myThumbHTML(), title:myTitle, channel:(state.channel?.name||'Your Channel'),
-    avatar:avatarHTML('av'), views:'24K', age:'3 hours ago', dur:'12:08'};
-  const total = 9;
+  const others=otherVideos();
+  const loadingN=state.competitors.filter(c=>c.loading).length;
+  const cards=[];
+  const myCard={ thumbHTML:myThumbHTML(), title:state.title||'Your video title goes here', channel:(state.channel?.name||'Your Channel'), avatar:avatarHTML('av'), meta:'24K views · 3 hours ago' };
+  let oi=0; const total=9;
   for(let i=0;i<total;i++){
-    if(i===1){ cards.push(cardHTML({...myCard, delay:i*0.04})); continue; }
-    cards.push(cardHTML({mine:false, thumbHTML:phThumb(i+3), title:rand(FAKE_TITLES), channel:rand(FAKE_CHANS),
-      avatar:`<div class="av" style="background:${colorFor('c'+i)}">${initials(FAKE_CHANS[i%FAKE_CHANS.length])}</div>`,
-      views:rand(VIEWS), age:rand(AGES), dur:rand(DUR), delay:i*0.04}));
+    if(i===1){ cards.push(gridCard({...myCard,delay:i*0.04})); continue; }
+    const v=others[oi++];
+    if(v){ cards.push(gridCard({ thumbHTML:ytImg(v.id), title:v.title, channel:v.ch.name, avatar:avatarHTML('av',v.ch), meta:vMeta(v), delay:i*0.04 })); }
+    else if(loadingN>0 && i>=2){ cards.push(skelCard(i*0.04)); }
+    else { cards.push(gridCard({ thumbHTML:phThumb(i+3), title:'Add a channel to compare real thumbnails', channel:'Thumbly', avatar:`<div class="av" style="background:${colorFor('t'+i)}">T</div>`, meta:'', delay:i*0.04 })); }
   }
-  return ytHeader() + `<div class="yt-body">${ytRail(0)}<div class="yt-main">${ytChips(['All','Music','Gaming','Live','Podcasts','News','Recently uploaded','Mixes','AI'])}<div class="yt-grid">${cards.join('')}</div></div></div>`;
+  const chips=['All','Music','Gaming','Live','Podcasts','News','Recently uploaded','Mixes','AI'];
+  return ytHeader()+`<div class="yt-body">${ytRail(0)}<div class="yt-main">${ytChips(chips)}<div class="yt-grid">${cards.join('')}</div></div></div>`;
 }
 
-function sideHTML(opts){
-  return `<div class="yt-side ${opts.mine?'mine':''}" style="animation-delay:${opts.delay}s">
-    <div class="sthumb">${opts.thumbHTML}<div class="dur">${opts.dur}</div></div>
-    <div class="sinfo">
-      <div class="st">${esc(opts.title)}</div>
-      <div class="ss">${esc(opts.channel)}</div>
-      <div class="ss">${opts.views} views · ${opts.age}</div>
-    </div>
-  </div>`;
-}
+function sideHTML(o){ return `<div class="yt-side" style="animation-delay:${o.delay}s"><div class="sthumb">${o.thumbHTML}</div><div class="sinfo"><div class="st">${esc(o.title)}</div><div class="ss">${esc(o.channel)}</div><div class="ss">${o.meta||''}</div></div></div>`; }
 function renderWatch(){
-  const sides = [];
-  const myTitle = state.title || 'Your video title goes here';
-  for(let i=0;i<10;i++){
-    if(i===0){
-      sides.push(sideHTML({mine:true, thumbHTML:myThumbHTML(), title:myTitle, channel:(state.channel?.name||'Your Channel'), views:'24K', age:'3 hours ago', dur:'12:08', delay:i*0.04}));
-      continue;
-    }
-    sides.push(sideHTML({mine:false, thumbHTML:phThumb(i+7), title:rand(FAKE_TITLES), channel:rand(FAKE_CHANS), views:rand(VIEWS), age:rand(AGES), dur:rand(DUR), delay:i*0.04}));
-  }
-  const main = `
-    <div class="yt-primary">
-      <div class="yt-player">${phThumb(2)}<div class="play-ov"><div class="pbtn"></div></div></div>
-      <div class="yt-vtitle">${esc(rand(FAKE_TITLES))}</div>
-      <div class="yt-vrow">
-        ${avatarHTML('av')}
-        <div><div class="cn">${esc(state.channel?.name||'Some Channel')}</div><div class="subs">1.2M subscribers</div></div>
-        <div class="subbtn">Subscribe</div>
-        <div class="stage-spacer"></div>
+  const others=otherVideos(); let oi=0; const sides=[];
+  sides.push(sideHTML({ thumbHTML:myThumbHTML(), title:state.title||'Your video title goes here', channel:(state.channel?.name||'Your Channel'), meta:'24K views · 3 hours ago', delay:0 }));
+  for(let i=1;i<11;i++){ const v=others[oi++]; if(v) sides.push(sideHTML({thumbHTML:ytImg(v.id),title:v.title,channel:v.ch.name,meta:vMeta(v),delay:i*0.04})); else sides.push(sideHTML({thumbHTML:phThumb(i+7),title:'Add channels to compare',channel:'Thumbly',meta:'',delay:i*0.04})); }
+  const feat=others[0];
+  const main=`<div class="yt-primary">
+      <div class="yt-player">${feat?ytImg(feat.id):phThumb(2)}<div class="play-ov"><div class="pbtn"></div></div></div>
+      <div class="yt-vtitle">${esc(feat?feat.title:'A video from a channel you compare')}</div>
+      <div class="yt-vrow">${avatarHTML('av',feat?feat.ch:state.channel)}
+        <div><div class="cn">${esc(feat?feat.ch.name:(state.channel?.name||'Channel'))}</div><div class="subs">1.2M subscribers</div></div>
+        <div class="subbtn">Subscribe</div><div class="stage-spacer"></div>
         <div class="pillbtn"><svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11a2 2 0 0 0-2-2h-6.31l.95-4.57.03-.32a1.5 1.5 0 0 0-.44-1.06L14.17 1 7.59 7.59A2 2 0 0 0 7 9v10a2 2 0 0 0 2 2h9a2 2 0 0 0 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>14K</div>
         <div class="pillbtn"><svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 1 0-3-3c0 .24.04.47.09.7L8.04 9.81A3 3 0 1 0 6 15a3 3 0 0 0 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65a2.92 2.92 0 1 0 2.92-2.92z"/></svg>Share</div>
-      </div>
-    </div>
-    <div class="yt-secondary">${sides.join('')}</div>`;
-  return ytHeader() + `<div class="yt-body">${ytRail(-1)}<div class="yt-main"><div class="yt-watch">${main}</div></div></div>`;
+      </div></div><div class="yt-secondary">${sides.join('')}</div>`;
+  return ytHeader()+`<div class="yt-body">${ytRail(-1)}<div class="yt-main"><div class="yt-watch">${main}</div></div></div>`;
 }
 
 function renderChannel(){
-  const cards = [];
-  const myTitle = state.title || 'Your video title goes here';
-  for(let i=0;i<8;i++){
-    if(i===0){
-      cards.push(cardHTML({mine:true, thumbHTML:myThumbHTML(), title:myTitle, channel:'', avatar:'', views:'24K', age:'3 hours ago', dur:'12:08', delay:0}));
-      continue;
-    }
-    cards.push(cardHTML({mine:false, thumbHTML:phThumb(i+11), title:rand(FAKE_TITLES), channel:'', avatar:'', views:rand(VIEWS), age:rand(AGES), dur:rand(DUR), delay:i*0.04}));
-  }
-  // channel cards omit the avatar/channel row (YouTube channel grid shows title + meta only)
-  const cleanCards = cards.map(c=>c.replace(/<div class="yt-meta">[\s\S]*?<div class="yt-info">/,'<div class="yt-meta"><div class="yt-info">'));
-  const name = state.channel?.name || 'Your Channel';
-  const handle = state.channel?.handle ? '@'+state.channel.handle : '@yourchannel';
-  return ytHeader() + `<div class="yt-body">${ytRail(-1)}<div class="yt-main"><div class="yt-channel">
+  const mine=state.channel?.videos||[];
+  const cards=[];
+  cards.push(gridCard({ thumbHTML:myThumbHTML(), title:state.title||'Your video title goes here', meta:'24K views · 3 hours ago', delay:0 }));
+  if(mine.length){ mine.slice(0,11).forEach((v,i)=>cards.push(gridCard({thumbHTML:ytImg(v.id),title:v.title,meta:vMeta(v),delay:(i+1)*0.04}))); }
+  else { for(let i=1;i<8;i++) cards.push(gridCard({thumbHTML:phThumb(i+11),title:'Your other uploads appear here',meta:'',delay:i*0.04})); }
+  const name=state.channel?.name||'Your Channel';
+  const handle=state.channel?.handle?'@'+state.channel.handle:'@yourchannel';
+  const note=mine.length?`Your real uploads — see how the new thumbnail sits next to them.`:`Couldn't load your uploads; showing placeholders. The new thumbnail is top-left.`;
+  return ytHeader()+`<div class="yt-body">${ytRail(-1)}<div class="yt-main"><div class="yt-channel">
     <div class="yt-banner"></div>
-    <div class="yt-chead">
-      ${avatarHTML('bigav')}
-      <div class="cmeta">
-        <h2>${esc(name)}</h2>
-        <div class="h"><b>${esc(handle)}</b> · 1.2M subscribers · 248 videos</div>
-        <div class="desc">Testing how this thumbnail looks on the channel page ✨</div>
-        <div class="csub">Subscribe</div>
-      </div>
-    </div>
+    <div class="yt-chead">${avatarHTML('bigav')}<div class="cmeta"><h2>${esc(name)}</h2><div class="h"><b>${esc(handle)}</b> · 1.2M subscribers · ${mine.length||248} videos</div><div class="desc">Comparing your new thumbnail against your latest uploads ✨</div><div class="csub">Subscribe</div></div></div>
     <div class="yt-ctabs"><div class="ct on">Home</div><div class="ct">Videos</div><div class="ct">Shorts</div><div class="ct">Live</div><div class="ct">Playlists</div><div class="ct">Posts</div></div>
-    <div class="yt-cgrid">${cleanCards.join('')}</div>
+    <div class="yt-cnote">${note}</div>
+    <div class="yt-cgrid">${cards.join('')}</div>
   </div></div></div>`;
 }
 
 function renderSearch(){
-  const rows = [];
-  const myTitle = state.title || 'Your video title goes here';
-  const desc = 'In this video we break down everything you need to know, step by step, with real examples you can follow along…';
-  for(let i=0;i<5;i++){
-    const mine = i===0;
-    rows.push(`<div class="yt-sr ${mine?'mine':''}" style="animation-delay:${i*0.05}s">
-      <div class="srthumb">${mine?myThumbHTML():phThumb(i+5)}<div class="dur">${mine?'12:08':rand(DUR)}</div></div>
-      <div class="srinfo">
-        <div class="srt">${esc(mine?myTitle:rand(FAKE_TITLES))}</div>
-        <div class="srm">${mine?'24K':rand(VIEWS)} views · ${mine?'3 hours ago':rand(AGES)}</div>
-        <div class="srchan">${mine?avatarHTML('av'):`<div class="av" style="background:${colorFor('s'+i)}">${initials(FAKE_CHANS[i])}</div>`}<span>${esc(mine?(state.channel?.name||'Your Channel'):FAKE_CHANS[i])}</span></div>
-        <div class="srd">${desc}</div>
-      </div>
-    </div>`);
-  }
-  return ytHeader() + `<div class="yt-body">${ytRail(-1)}<div class="yt-main"><div class="yt-search-results">${rows.join('')}</div></div></div>`;
+  const others=otherVideos(); let oi=0; const rows=[];
+  const desc='In this video we break down everything you need to know, step by step, with real examples you can follow along…';
+  rows.push(srRow({thumbHTML:myThumbHTML(),title:state.title||'Your video title goes here',meta:'24K views · 3 hours ago',avatar:avatarHTML('av'),chan:(state.channel?.name||'Your Channel'),desc,delay:0}));
+  for(let i=1;i<5;i++){ const v=others[oi++]; if(v) rows.push(srRow({thumbHTML:ytImg(v.id),title:v.title,meta:vMeta(v),avatar:avatarHTML('av',v.ch),chan:v.ch.name,desc,delay:i*0.05})); else rows.push(srRow({thumbHTML:phThumb(i+5),title:'Add channels to compare',meta:'',avatar:`<div class="av" style="background:${colorFor('s'+i)}">T</div>`,chan:'Thumbly',desc,delay:i*0.05})); }
+  return ytHeader()+`<div class="yt-body">${ytRail(-1)}<div class="yt-main"><div class="yt-search-results">${rows.join('')}</div></div></div>`;
 }
+function srRow(o){ return `<div class="yt-sr" style="animation-delay:${o.delay}s"><div class="srthumb">${o.thumbHTML}</div><div class="srinfo"><div class="srt">${esc(o.title)}</div><div class="srm">${o.meta||''}</div><div class="srchan">${o.avatar}<span>${esc(o.chan)}</span></div><div class="srd">${esc(o.desc)}</div></div></div>`; }
 
 function render(){
-  const yt = $('yt');
-  yt.setAttribute('data-yt', state.theme);
-  let html='';
-  switch(state.view){
-    case 'home': html=renderHome(); break;
-    case 'watch': html=renderWatch(); break;
-    case 'channel': html=renderChannel(); break;
-    case 'search': html=renderSearch(); break;
-  }
-  yt.innerHTML = html;
-  yt.classList.remove('view-fade'); void yt.offsetWidth; yt.classList.add('view-fade');
-  // sync side panel chip
-  renderPanelChannel();
+  const yt=$('yt'); yt.setAttribute('data-yt',state.theme);
+  let html=''; switch(state.view){ case 'home':html=renderHome();break; case 'watch':html=renderWatch();break; case 'channel':html=renderChannel();break; case 'search':html=renderSearch();break; }
+  yt.innerHTML=html; yt.classList.remove('view-fade'); void yt.offsetWidth; yt.classList.add('view-fade');
+  renderPanelChannel(); renderCompList();
+}
+function renderPanelChannel(){ const c=state.channel,img=$('pImg'),ph=$('pPh');
+  if(c?.avatar){ img.src=c.avatar; img.style.display=''; ph.style.display='none'; } else { img.style.display='none'; ph.style.display='grid'; ph.style.background=colorFor(c?.name||'You'); ph.textContent=initials(c?.name||'You'); }
+  $('pName').textContent=c?.name||'Your Channel'; $('pHandle').textContent=c?.handle?'@'+c.handle:'no handle';
+}
+function renderCompList(){
+  const el=$('compList'); if(!el) return;
+  if(!state.competitors.length){ el.innerHTML=`<div class="comp-empty">Add competitor channels to fill the Home, Watch &amp; Search feeds with their real thumbnails.</div>`; return; }
+  el.innerHTML=state.competitors.map((c,i)=>{
+    if(c.loading) return `<div class="comp-item loading"><div class="ph" style="background:rgba(255,255,255,.06)"><span class="spinner" style="width:15px;height:15px;border-width:2px"></span></div><div class="nm">${esc(c.input)}<small>fetching…</small></div></div>`;
+    const av=c.avatar?`<img src="${c.avatar}" alt="">`:`<div class="ph" style="background:${colorFor(c.name)}">${initials(c.name)}</div>`;
+    return `<div class="comp-item">${av}<div class="nm">${esc(c.name)}<small>${(c.videos||[]).length} videos</small></div><button class="rm" data-i="${i}"><svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></div>`;
+  }).join('');
 }
 
-function renderPanelChannel(){
-  const c = state.channel;
-  const img=$('pImg'), ph=$('pPh');
-  if(c?.avatar){ img.src=c.avatar; img.style.display=''; ph.style.display='none'; }
-  else { img.style.display='none'; ph.style.display='grid'; ph.style.background=colorFor(c?.name||'You'); ph.textContent=initials(c?.name||'You'); }
-  $('pName').textContent = c?.name || 'Your Channel';
-  $('pHandle').textContent = c?.handle ? '@'+c.handle : 'no handle';
-}
-
-/* ============================================================
-   Onboarding flow
-============================================================ */
-function showApp(){
-  $('onboard').classList.add('hide');
-  setTimeout(()=>{ $('onboard').style.display='none'; },450);
-  $('app').classList.add('show');
-  render();
-}
+/* ============================================================ onboarding */
+function setProgress(pct,msg){ $('progress').classList.add('show'); $('progBar').style.width=pct+'%'; if(msg!==undefined)$('progLabel').textContent=msg; }
+function resetProgress(){ $('progress').classList.remove('show'); $('progBar').style.width='0'; $('progLabel').textContent=''; }
+function showApp(){ $('onboard').classList.add('hide'); setTimeout(()=>$('onboard').style.display='none',450); $('app').classList.add('show'); render(); }
 
 async function doLoad(){
-  const v = $('handleInput').value.trim();
-  const err = $('onbErr');
-  if(!v){ err.textContent='Please enter your channel handle or name.'; return; }
-  err.textContent='';
-  const btn=$('loadBtn'); btn.disabled=true;
-  $('loadLabel').innerHTML='<span class="spinner"></span>';
-  let ch = await fetchChannel(v);
-  if(!ch){
-    // graceful fallback — use what the user typed, generated avatar
-    ch = { name: v.replace(/^@/,''), handle: v.replace(/^@/,''), avatar: null };
-    err.textContent = "Couldn't auto-grab the avatar — using your name. You can still test everything.";
+  const v=$('handleInput').value.trim(); const err=$('onbErr');
+  if(!v){ err.textContent='Please enter your channel handle, name or link.'; return; }
+  err.textContent=''; const btn=$('loadBtn'); btn.disabled=true; $('loadLabel').innerHTML='<span class="spinner"></span> Loading…';
+  setProgress(8,'Starting…');
+  let ch;
+  try{ ch=await getChannelData(v,setProgress); }
+  catch(e){ ch=null; }
+  if(!ch || (!ch.avatar && !(ch.videos&&ch.videos.length))){
+    ch=ch||{name:v.replace(/^@/,''),handle:v.replace(/^@/,''),avatar:null,videos:[]};
+    err.textContent="Couldn't auto-grab everything — using what we found. You can still test fully.";
   }
-  state.channel = ch;
-  localStorage.setItem(LS_KEY, JSON.stringify(ch));
-  btn.disabled=false; $('loadLabel').textContent='Load my channel';
-  showApp();
-  toast(ch.avatar ? `Loaded ${ch.name} ✨` : `Ready, ${ch.name}!`);
+  state.channel=ch; localStorage.setItem(LS_CH,JSON.stringify(ch));
+  setProgress(100,'Done');
+  setTimeout(()=>{ btn.disabled=false; $('loadLabel').textContent='Load my channel'; resetProgress(); showApp(); toast(ch.avatar?`Loaded ${ch.name} ✨`:`Ready, ${ch.name}!`); },350);
 }
+$('loadBtn').addEventListener('click',doLoad);
+$('handleInput').addEventListener('keydown',e=>{ if(e.key==='Enter') doLoad(); });
+$('changeChan').addEventListener('click',()=>{ $('onboard').style.display='flex'; $('onboard').classList.remove('hide'); $('app').classList.remove('show'); $('handleInput').value=state.channel?.handle||''; $('handleInput').focus(); });
 
-$('loadBtn').addEventListener('click', doLoad);
-$('handleInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLoad(); });
+/* ============================================================ competitors */
+async function addCompetitor(input){
+  if(!input.trim()) return;
+  const entry={input:input.trim(),loading:true}; state.competitors.push(entry); renderCompList(); render();
+  try{
+    const data=await getChannelData(input);
+    Object.assign(entry,data,{loading:false}); delete entry.input;
+    toast(`Added ${data.name}`);
+  }catch(e){
+    state.competitors=state.competitors.filter(c=>c!==entry);
+    toast('Could not load that channel');
+  }
+  saveCompetitors(); renderCompList(); render();
+}
+function saveCompetitors(){ try{ localStorage.setItem(LS_COMP,JSON.stringify(state.competitors.filter(c=>!c.loading))); }catch(e){} }
+$('compAdd').addEventListener('click',()=>{ const v=$('compInput').value; $('compInput').value=''; addCompetitor(v); });
+$('compInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const v=$('compInput').value; $('compInput').value=''; addCompetitor(v); } });
+$('compList').addEventListener('click',e=>{ const b=e.target.closest('.rm'); if(!b) return; state.competitors.splice(+b.dataset.i,1); saveCompetitors(); renderCompList(); render(); });
 
-$('changeChan').addEventListener('click', ()=>{
-  $('onboard').style.display='flex';
-  $('onboard').classList.remove('hide');
-  $('app').classList.remove('show');
-  $('handleInput').value = state.channel?.handle || '';
-  $('handleInput').focus();
-});
-
-/* ============================================================
-   Thumbnail upload
-============================================================ */
-const drop=$('drop'), fileInput=$('fileInput');
-drop.addEventListener('click', ()=>fileInput.click());
+/* ============================================================ thumbnail upload */
+const drop=$('drop'),fileInput=$('fileInput');
+drop.addEventListener('click',()=>fileInput.click());
 ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
-drop.addEventListener('drop', e=>{ const f=e.dataTransfer.files[0]; if(f) handleFile(f); });
-fileInput.addEventListener('change', e=>{ const f=e.target.files[0]; if(f) handleFile(f); });
-
+drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) handleFile(f); });
+fileInput.addEventListener('change',e=>{ const f=e.target.files[0]; if(f) handleFile(f); });
 function handleFile(file){
   if(!file.type.startsWith('image/')){ toast('Please choose an image file'); return; }
-  const sizeMB = file.size/(1024*1024);
-  const warn=$('sizeWarn');
-  if(sizeMB>2){
-    $('warnText').textContent = `Heads up — this image is ${sizeMB.toFixed(1)}MB. YouTube's limit is 2MB; compress before uploading.`;
-    warn.classList.add('show');
-  } else {
-    warn.classList.remove('show');
-  }
-  const reader=new FileReader();
-  reader.onload=e=>{
-    state.thumb=e.target.result;
-    $('thumbPrev').src=state.thumb;
-    drop.classList.add('has');
-    render();
-  };
-  reader.readAsDataURL(file);
+  const mb=file.size/(1024*1024); const warn=$('sizeWarn');
+  if(mb>2){ $('warnText').textContent=`Heads up — this image is ${mb.toFixed(1)}MB. YouTube's limit is 2MB; compress before uploading.`; warn.classList.add('show'); }
+  else warn.classList.remove('show');
+  const r=new FileReader(); r.onload=e=>{ state.thumb=e.target.result; $('thumbPrev').src=state.thumb; drop.classList.add('has'); render(); }; r.readAsDataURL(file);
 }
 
-/* ============================================================
-   Title (realtime, no submit)
-============================================================ */
+/* ============================================================ title / tabs / device / theme */
 const titleInput=$('titleInput');
-function updateCount(){
-  const n=titleInput.value.length;
-  $('count').textContent=`${n} / 100`;
-  $('count').classList.toggle('warn-c', n>70);
-}
-titleInput.addEventListener('input', ()=>{
-  state.title=titleInput.value;
-  updateCount();
-  render();
-});
+function updateCount(){ const n=titleInput.value.length; $('count').textContent=`${n} / 100`; $('count').classList.toggle('warn-c',n>70); }
+titleInput.addEventListener('input',()=>{ state.title=titleInput.value; updateCount(); render(); });
+$('tabs').addEventListener('click',e=>{ const b=e.target.closest('.tab'); if(!b) return; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); b.classList.add('active'); state.view=b.dataset.view; render(); });
+$('devicePill').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; document.querySelectorAll('.device-pill button').forEach(t=>t.classList.remove('active')); b.classList.add('active'); state.device=b.dataset.device; $('viewport').classList.toggle('mobile',state.device==='mobile'); });
+function setTheme(t){ state.theme=t; $('tDark').classList.toggle('active',t==='dark'); $('tLight').classList.toggle('active',t==='light'); $('yt').setAttribute('data-yt',t); }
+$('tDark').addEventListener('click',()=>setTheme('dark')); $('tLight').addEventListener('click',()=>setTheme('light'));
 
-/* ============================================================
-   Tabs / device / theme
-============================================================ */
-$('tabs').addEventListener('click', e=>{
-  const b=e.target.closest('.tab'); if(!b) return;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  b.classList.add('active');
-  state.view=b.dataset.view;
-  render();
-});
-$('devicePill').addEventListener('click', e=>{
-  const b=e.target.closest('button'); if(!b) return;
-  document.querySelectorAll('.device-pill button').forEach(t=>t.classList.remove('active'));
-  b.classList.add('active');
-  state.device=b.dataset.device;
-  $('viewport').classList.toggle('mobile', state.device==='mobile');
-});
-function setTheme(t){
-  state.theme=t;
-  $('tDark').classList.toggle('active', t==='dark');
-  $('tLight').classList.toggle('active', t==='light');
-  $('yt').setAttribute('data-yt', t);
-}
-$('tDark').addEventListener('click', ()=>setTheme('dark'));
-$('tLight').addEventListener('click', ()=>setTheme('light'));
+/* ============================================================ toast */
+let toastTimer; function toast(msg){ $('toastText').textContent=msg; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2600); }
 
-/* ============================================================
-   Toast
-============================================================ */
-let toastTimer;
-function toast(msg){
-  $('toastText').textContent=msg;
-  $('toast').classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2600);
-}
-
-/* ============================================================
-   Boot
-============================================================ */
+/* ============================================================ boot */
 (function boot(){
   updateCount();
-  const saved=localStorage.getItem(LS_KEY);
-  if(saved){
-    try{
-      state.channel=JSON.parse(saved);
-      $('onboard').style.display='none';
-      $('app').classList.add('show');
-      render();
-    }catch(e){ /* show onboard */ $('handleInput').focus(); }
-  } else {
-    setTimeout(()=>$('handleInput').focus(),400);
-  }
+  try{ const c=localStorage.getItem(LS_COMP); if(c) state.competitors=JSON.parse(c); }catch(e){}
+  const saved=localStorage.getItem(LS_CH);
+  if(saved){ try{ state.channel=JSON.parse(saved); $('onboard').style.display='none'; $('app').classList.add('show'); render(); }catch(e){ setTimeout(()=>$('handleInput').focus(),400); } }
+  else setTimeout(()=>$('handleInput').focus(),400);
 })();
 </script>
 </body>
