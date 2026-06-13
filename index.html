@@ -268,7 +268,6 @@ input,textarea{font-family:inherit}
 .yt-ctabs .ct.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;background:var(--yt-text);border-radius:3px}
 .yt-cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 30px 0}
 .yt-cgrid .yt-title{font-size:13.5px}
-.yt-cnote{padding:14px 30px 0;font-size:13px;color:var(--yt-sec)}
 
 /* SEARCH */
 .yt-search-results{padding:18px 22px 28px;max-width:1000px}
@@ -488,12 +487,21 @@ async function getChannelData(input,onProgress){
   const channelId=p.id||extractChannelId(html);
   const name=(meta(html,'og:title')||p.value).replace(/ - YouTube$/,'');
   const avatar=meta(html,'og:image');
+  /* banner: yt embeds banner URLs in the ytInitialData JSON blob */
+  let banner=null;
+  const banM=html.match(/"banner":\{"imageBanner":\{"thumbnails":\[.*?"url":"([^"]+)"/);
+  if(!banM){ const b2=html.match(/"tvBanner":|"mobileBanner":|c4TabbedHeaderRenderer[\s\S]{0,400}"banner"[\s\S]{0,200}"url":"([^"]+\.(?:jpg|png|webp)[^"]*)"/); if(b2) banner=b2[1]; } else { banner=banM[1]; }
+  /* also try og:image:alt or a broader scan */
+  if(!banner){ const bm=html.match(/"url":"(https:\/\/yt3\.ggpht\.com\/[^"]*=w[0-9]+-fcrop[^"]+)"/); if(bm) banner=bm[1]; }
+  /* description: og:description → strip "videos" suffix noise */
+  const rawDesc=meta(html,'og:description')||'';
+  const description=rawDesc.replace(/^\d[\d,.]* (?:videos?)?.*?[-–·•]\s*/,'').trim();
   onProgress&&onProgress(80,'Loading recent videos…');
   const shortIds=extractShortIds(html);
   let videos=[];
   if(channelId){ try{ const xml=await fetchText('https://www.youtube.com/feeds/videos.xml?channel_id='+channelId); videos=parseRSS(xml).map(v=>({...v,isShort:shortIds.has(v.id)})); }catch(e){} }
   onProgress&&onProgress(100,'Done');
-  const data={ name, handle:p.handle, avatar:(avatar&&/ggpht|yt3|googleusercontent/.test(avatar))?avatar:null, channelId, videos };
+  const data={ name, handle:p.handle, avatar:(avatar&&/ggpht|yt3|googleusercontent/.test(avatar))?avatar:null, banner, description, channelId, videos };
   writeCache(key,data);
   return data;
 }
@@ -586,14 +594,17 @@ function renderChannel(){
   cards.push(gridCard({ thumbHTML:myThumbHTML(), title:state.title||'Your video title goes here', meta:'24K views · 3 hours ago', delay:0 }));
   if(mine.length){ mine.slice(0,11).forEach((v,i)=>cards.push(gridCard({thumbHTML:ytImg(v.id),title:v.title,meta:vMeta(v),delay:(i+1)*0.04}))); }
   else { for(let i=1;i<8;i++) cards.push(gridCard({thumbHTML:phThumb(i+11),title:'Your other uploads appear here',meta:'',delay:i*0.04})); }
-  const name=state.channel?.name||'Your Channel';
-  const handle=state.channel?.handle?'@'+state.channel.handle:'@yourchannel';
-  const note=mine.length?`Your real uploads — see how the new thumbnail sits next to them.`:`Couldn't load your uploads; showing placeholders. The new thumbnail is top-left.`;
+  const ch=state.channel||{};
+  const name=ch.name||'Your Channel';
+  const handle=ch.handle?'@'+ch.handle:'@yourchannel';
+  const desc=ch.description||'';
+  const bannerHTML=ch.banner
+    ?`<div class="yt-banner"><img src="${ch.banner}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>`
+    :`<div class="yt-banner"></div>`;
   return ytHeader()+`<div class="yt-body">${ytRail(-1)}<div class="yt-main"><div class="yt-channel">
-    <div class="yt-banner"></div>
-    <div class="yt-chead">${avatarHTML('bigav')}<div class="cmeta"><h2>${esc(name)}</h2><div class="h"><b>${esc(handle)}</b> · 1.2M subscribers · ${mine.length||248} videos</div><div class="desc">Comparing your new thumbnail against your latest uploads ✨</div><div class="csub">Subscribe</div></div></div>
+    ${bannerHTML}
+    <div class="yt-chead">${avatarHTML('bigav')}<div class="cmeta"><h2>${esc(name)}</h2><div class="h"><b>${esc(handle)}</b> · 1.2M subscribers · ${mine.length||248} videos</div>${desc?`<div class="desc">${esc(desc)}</div>`:''}<div class="csub">Subscribe</div></div></div>
     <div class="yt-ctabs"><div class="ct on">Home</div><div class="ct">Videos</div><div class="ct">Shorts</div><div class="ct">Live</div><div class="ct">Playlists</div><div class="ct">Posts</div></div>
-    <div class="yt-cnote">${note}</div>
     <div class="yt-cgrid">${cards.join('')}</div>
   </div></div></div>`;
 }
