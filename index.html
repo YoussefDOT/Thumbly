@@ -135,6 +135,14 @@ input,textarea{font-family:inherit}
 .comp-item .rm svg{width:14px;height:14px;fill:currentColor}
 .comp-item.loading .nm{color:#8a8a99}
 .comp-empty{font-size:12px;color:#7a7a88;font-weight:300;line-height:1.5;text-align:center;padding:4px 0}
+.toggle-row{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:13px;border-top:1px solid rgba(255,255,255,.07)}
+.toggle-row .tr-meta{flex:1;min-width:0}
+.toggle-row .tr-t{font-size:13.5px;font-weight:500}
+.toggle-row .tr-s{font-size:11.5px;color:#7a7a88;font-weight:300;margin-top:2px;line-height:1.4}
+.switch{flex:0 0 auto;width:44px;height:25px;border-radius:20px;background:rgba(255,255,255,.14);position:relative;transition:.3s var(--ease)}
+.switch span{position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:#fff;transition:.3s var(--ease);box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.switch.on{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.switch.on span{left:22px}
 
 .theme-row{display:flex;gap:10px}
 .theme-btn{flex:1;padding:13px;border-radius:14px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;gap:9px;font-size:13.5px;font-weight:500;transition:.28s var(--ease);color:#bdbdcc}
@@ -365,6 +373,10 @@ input,textarea{font-family:inherit}
         <button class="add" id="compAdd">Add</button>
       </div>
       <div class="comp-list" id="compList"></div>
+      <div class="toggle-row">
+        <div class="tr-meta"><div class="tr-t">Exclude Shorts</div><div class="tr-s">Hide vertical Shorts from fetched videos</div></div>
+        <button class="switch on" id="shortsToggle" role="switch" aria-checked="true"><span></span></button>
+      </div>
     </div>
 
     <div class="section" style="animation-delay:.25s">
@@ -400,8 +412,8 @@ input,textarea{font-family:inherit}
 
 <script>
 /* ============================================================ state */
-const LS_CH='thumbly.channel.v2', LS_COMP='thumbly.competitors.v2', LS_CACHE='thumbly.cache.v2';
-const state={ channel:null, competitors:[], thumb:null, title:document.getElementById('titleInput').value, view:'home', device:'desktop', theme:'dark' };
+const LS_CH='thumbly.channel.v2', LS_COMP='thumbly.competitors.v2', LS_CACHE='thumbly.cache.v3', LS_SHORTS='thumbly.exShorts.v1';
+const state={ channel:null, competitors:[], thumb:null, title:document.getElementById('titleInput').value, view:'home', device:'desktop', theme:'dark', excludeShorts:true };
 const $=id=>document.getElementById(id);
 
 /* ============================================================ helpers */
@@ -451,6 +463,9 @@ function extractChannelId(html){
   return m?m[1]:null;
 }
 function meta(html,prop){ const m=html.match(new RegExp('<meta property="'+prop+'" content="([^"]*)"')); return m?m[1]:null; }
+/* Shorts are listed on the channel page's Shorts shelf — collect their ids (no extra request) */
+function extractShortIds(html){ const set=new Set(); const re=/(?:\/shorts\/|"reelWatchEndpoint":\{"videoId":")([\w-]{11})/g; let m; while((m=re.exec(html))) set.add(m[1]); return set; }
+function isShortVid(v){ return v.isShort===true || /#shorts?\b/i.test(v.title||''); }
 function parseRSS(xml){
   const doc=new DOMParser().parseFromString(xml,'application/xml');
   const entries=doc.getElementsByTagName('entry'); const out=[];
@@ -474,8 +489,9 @@ async function getChannelData(input,onProgress){
   const name=(meta(html,'og:title')||p.value).replace(/ - YouTube$/,'');
   const avatar=meta(html,'og:image');
   onProgress&&onProgress(80,'Loading recent videos…');
+  const shortIds=extractShortIds(html);
   let videos=[];
-  if(channelId){ try{ const xml=await fetchText('https://www.youtube.com/feeds/videos.xml?channel_id='+channelId); videos=parseRSS(xml); }catch(e){} }
+  if(channelId){ try{ const xml=await fetchText('https://www.youtube.com/feeds/videos.xml?channel_id='+channelId); videos=parseRSS(xml).map(v=>({...v,isShort:shortIds.has(v.id)})); }catch(e){} }
   onProgress&&onProgress(100,'Done');
   const data={ name, handle:p.handle, avatar:(avatar&&/ggpht|yt3|googleusercontent/.test(avatar))?avatar:null, channelId, videos };
   writeCache(key,data);
@@ -485,10 +501,12 @@ async function getChannelData(input,onProgress){
 /* ============================================================ video pools */
 function otherVideos(){
   // real competitor videos, else my own, else placeholders
+  const keep=v=>!state.excludeShorts||!isShortVid(v);
   const pool=[];
-  state.competitors.filter(c=>!c.loading).forEach(c=>{ (c.videos||[]).slice(0,6).forEach(v=>pool.push({...v,ch:c})); });
+  state.competitors.filter(c=>!c.loading).forEach(c=>{ (c.videos||[]).filter(keep).slice(0,6).forEach(v=>pool.push({...v,ch:c})); });
   if(pool.length) return shuffle(pool);
-  if(state.channel?.videos?.length) return state.channel.videos.map(v=>({...v,ch:state.channel}));
+  const own=(state.channel?.videos||[]).filter(keep);
+  if(own.length) return own.map(v=>({...v,ch:state.channel}));
   return [];
 }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -563,7 +581,7 @@ function renderWatch(){
 }
 
 function renderChannel(){
-  const mine=state.channel?.videos||[];
+  const mine=(state.channel?.videos||[]).filter(v=>!state.excludeShorts||!isShortVid(v));
   const cards=[];
   cards.push(gridCard({ thumbHTML:myThumbHTML(), title:state.title||'Your video title goes here', meta:'24K views · 3 hours ago', delay:0 }));
   if(mine.length){ mine.slice(0,11).forEach((v,i)=>cards.push(gridCard({thumbHTML:ytImg(v.id),title:v.title,meta:vMeta(v),delay:(i+1)*0.04}))); }
@@ -652,6 +670,7 @@ function saveCompetitors(){ try{ localStorage.setItem(LS_COMP,JSON.stringify(sta
 $('compAdd').addEventListener('click',()=>{ const v=$('compInput').value; $('compInput').value=''; addCompetitor(v); });
 $('compInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const v=$('compInput').value; $('compInput').value=''; addCompetitor(v); } });
 $('compList').addEventListener('click',e=>{ const b=e.target.closest('.rm'); if(!b) return; state.competitors.splice(+b.dataset.i,1); saveCompetitors(); renderCompList(); render(); });
+$('shortsToggle').addEventListener('click',()=>{ state.excludeShorts=!state.excludeShorts; const b=$('shortsToggle'); b.classList.toggle('on',state.excludeShorts); b.setAttribute('aria-checked',state.excludeShorts); localStorage.setItem(LS_SHORTS,state.excludeShorts?'1':'0'); render(); toast(state.excludeShorts?'Shorts hidden':'Shorts shown'); });
 
 /* ============================================================ thumbnail upload */
 const drop=$('drop'),fileInput=$('fileInput');
@@ -680,12 +699,24 @@ $('tDark').addEventListener('click',()=>setTheme('dark')); $('tLight').addEventL
 /* ============================================================ toast */
 let toastTimer; function toast(msg){ $('toastText').textContent=msg; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2600); }
 
+/* refresh saved channel/competitors in the background so Shorts get detected & data stays fresh */
+async function refreshSaved(){
+  const needs=v=>v.isShort===undefined;
+  const jobs=[];
+  if(state.channel?.handle && (state.channel.videos||[]).some(needs)){
+    jobs.push(getChannelData(state.channel.handle).then(d=>{ state.channel={...state.channel,...d}; localStorage.setItem(LS_CH,JSON.stringify(state.channel)); }).catch(()=>{}));
+  }
+  state.competitors.forEach(c=>{ if(c.handle && (c.videos||[]).some(needs)) jobs.push(getChannelData(c.handle).then(d=>Object.assign(c,d)).catch(()=>{})); });
+  if(jobs.length){ await Promise.all(jobs); saveCompetitors(); render(); }
+}
+
 /* ============================================================ boot */
 (function boot(){
   updateCount();
+  if(localStorage.getItem(LS_SHORTS)==='0'){ state.excludeShorts=false; const b=$('shortsToggle'); b.classList.remove('on'); b.setAttribute('aria-checked','false'); }
   try{ const c=localStorage.getItem(LS_COMP); if(c) state.competitors=JSON.parse(c); }catch(e){}
   const saved=localStorage.getItem(LS_CH);
-  if(saved){ try{ state.channel=JSON.parse(saved); $('onboard').style.display='none'; $('app').classList.add('show'); render(); }catch(e){ setTimeout(()=>$('handleInput').focus(),400); } }
+  if(saved){ try{ state.channel=JSON.parse(saved); $('onboard').style.display='none'; $('app').classList.add('show'); render(); refreshSaved(); }catch(e){ setTimeout(()=>$('handleInput').focus(),400); } }
   else setTimeout(()=>$('handleInput').focus(),400);
 })();
 </script>
