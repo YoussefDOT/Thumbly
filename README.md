@@ -28,7 +28,32 @@ python3 -m http.server 8000
 
 ## How channel data is fetched
 
-There's no official key-less YouTube API, so Thumbly fetches the public channel page (via raced CORS proxies) to read the avatar/name and the channel's RSS feed for recent videos. Thumbnails come straight from `i.ytimg.com`. Everything runs client-side; nothing is stored on a server.
+There's no official key-less YouTube API, so Thumbly fetches the public channel page to read the avatar/name/description and the channel's RSS feed for recent videos. Thumbnails come straight from `i.ytimg.com`, and Shorts are detected by the aspect ratio of their `oardefault.jpg` thumbnail. Everything runs client-side; nothing is stored on a server.
+
+## Reliable fetching
+
+Out of the box Thumbly races free public CORS proxies, but they're unreliable for **large channels**:
+
+- **corsproxy.io** is US-hosted and returns the real page, but caps responses at ~1 MB — and big channel pages exceed that.
+- **allorigins** has no size cap but is EU-hosted, so YouTube serves it the cookie-consent wall, which contains no channel data.
+
+The result: small channels load, large ones (MrBeast, MKBHD, etc.) often fail. The fix is a tiny **Cloudflare Worker** — free, no size cap, and it sends a consent cookie so YouTube returns the full real page (banner, subscriber count and Shorts included).
+
+### Deploy the proxy (free, ~2 minutes)
+
+**Option A — Dashboard**
+1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Create Worker**.
+2. Replace the default code with the contents of [`worker.js`](worker.js), then **Deploy**.
+3. Copy the worker URL (e.g. `https://thumbly-proxy.yourname.workers.dev`).
+4. In Thumbly, open **Change → "Big channels won't load? Add a free proxy"** and paste the URL.
+
+**Option B — Wrangler CLI**
+```bash
+npm i -g wrangler
+wrangler deploy worker.js --name thumbly-proxy
+```
+
+Once set, the worker URL is saved to your device and used first for every fetch; the public proxies remain as fallback.
 
 ## License
 

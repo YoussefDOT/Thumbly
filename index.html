@@ -68,6 +68,20 @@ input,textarea{font-family:inherit}
 .progress.show{opacity:1;max-height:30px}
 .progress .bar{height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .5s var(--ease);box-shadow:0 0 14px rgba(255,58,58,.6)}
 .prog-label{font-size:12px;color:#9a9aa8;text-align:center;margin-top:9px;font-weight:400;min-height:16px;transition:.3s}
+.adv{margin-top:16px;border-top:1px solid rgba(255,255,255,.08);padding-top:14px;text-align:left}
+.adv summary{font-size:12.5px;color:#9a9aa8;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;user-select:none;transition:.2s}
+.adv summary::-webkit-details-marker{display:none}
+.adv summary::before{content:"\2699";font-size:13px;opacity:.7}
+.adv summary:hover{color:#c9c9d6}
+.adv summary .rec{font-size:9.5px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));padding:2px 7px;border-radius:6px;margin-left:auto}
+.adv[open] summary{margin-bottom:11px;color:#c9c9d6}
+.adv input{width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);color:#fff;font-size:13.5px;transition:.25s var(--ease)}
+.adv input:focus{outline:none;border-color:var(--accent);background:rgba(255,58,58,.07)}
+.adv input::placeholder{color:#6c6c7a}
+.adv-help{font-size:11.5px;color:#7a7a88;font-weight:300;line-height:1.55;margin-top:9px}
+.adv-help b{color:#a9a9b8;font-weight:500}
+.adv-help a{color:var(--accent);text-decoration:none;font-weight:500}
+.adv-help a:hover{text-decoration:underline}
 .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
 .err{color:#ff9a9a;font-size:12.5px;margin-top:10px;text-align:center;min-height:0;line-height:1.4}
@@ -344,6 +358,11 @@ input,textarea{font-family:inherit}
     <div class="prog-label" id="progLabel"></div>
     <div class="err" id="onbErr"></div>
     <p class="hint">Saved to <b>this device</b> only — you won't type it again. Works with <b>@handle</b>, channel name, or any <b>youtube.com</b> link.</p>
+    <details class="adv" id="advBox">
+      <summary>Big channels won't load? Add a free proxy <span class="rec">recommended</span></summary>
+      <input id="proxyInput" type="text" placeholder="https://your-worker.workers.dev" autocomplete="off" spellcheck="false" />
+      <p class="adv-help">Public proxies can't fetch large channels (size caps &amp; YouTube's consent wall). Deploy the one-file Cloudflare Worker from the repo (free, ~2 min), paste its URL here, and <b>every</b> channel loads reliably. <a href="https://github.com/YoussefDOT/Thumbly#reliable-fetching" target="_blank" rel="noopener">Setup guide →</a></p>
+    </details>
   </div>
 </div>
 
@@ -434,7 +453,7 @@ input,textarea{font-family:inherit}
 <script>
 /* ============================================================ state */
 const LS_CH='thumbly.channel.v2', LS_COMP='thumbly.competitors.v2', LS_CACHE='thumbly.cache.v4', LS_SHORTS='thumbly.exShorts.v1';
-const LS_RECENT_HANDLE='thumbly.recent.handle.v1', LS_RECENT_COMP='thumbly.recent.compare.v1';
+const LS_RECENT_HANDLE='thumbly.recent.handle.v1', LS_RECENT_COMP='thumbly.recent.compare.v1', LS_PROXY='thumbly.proxy.v1';
 const state={ channel:null, competitors:[], thumb:null, title:document.getElementById('titleInput').value, view:'home', device:'desktop', theme:'dark', excludeShorts:true };
 const $=id=>document.getElementById(id);
 
@@ -461,17 +480,24 @@ const PROXIES=[
   {f:u=>'https://api.allorigins.win/get?url='+encodeURIComponent(u), json:true},
   {f:u=>'https://thingproxy.freeboard.io/fetch/'+u},
 ];
-function fetchText(url,validate){
+function customProxy(){ return (localStorage.getItem(LS_PROXY)||'').trim().replace(/\/+$/,''); }
+function proxyList(){ const list=PROXIES.slice(); const cw=customProxy(); if(cw) list.unshift({f:u=>cw+(cw.includes('?')?'&':'?')+'url='+encodeURIComponent(u)}); return list; }
+function raceProxies(url,validate){
   // race every proxy; a proxy that returns 200 with a junk/consent page is rejected so another can win
-  const tasks=PROXIES.map(px=>{ const c=new AbortController(); const t=setTimeout(()=>c.abort(),13000);
+  const tasks=proxyList().map(px=>{ const c=new AbortController(); const t=setTimeout(()=>c.abort(),13000);
     return fetch(px.f(url),{signal:c.signal}).then(r=>{ if(!r.ok) throw new Error('bad'); return r.text(); })
       .then(raw=>{ let txt=raw; if(px.json){ try{ txt=JSON.parse(raw).contents||''; }catch(e){ throw new Error('badjson'); } } if(!txt || (validate && !validate(txt))) throw new Error('invalid'); return txt; })
       .finally(()=>clearTimeout(t)); });
   return Promise.any(tasks);
 }
+async function fetchText(url,validate){
+  // retry once — public proxies are flaky and a second race often succeeds
+  for(let i=0;i<2;i++){ try{ return await raceProxies(url,validate); }catch(e){ if(i) throw e; await new Promise(r=>setTimeout(r,500)); } }
+}
 function readCacheAll(){ try{ return JSON.parse(localStorage.getItem(LS_CACHE)||'{}'); }catch(e){ return {}; } }
 function readCache(k){ const c=readCacheAll()[k]; if(c && Date.now()-c._t<6*3600*1000) return c.d; return null; }
 function writeCache(k,d){ const all=readCacheAll(); all[k]={_t:Date.now(),d}; try{ localStorage.setItem(LS_CACHE,JSON.stringify(all)); }catch(e){} }
+function readCacheClear(){ try{ localStorage.removeItem(LS_CACHE); }catch(e){} }
 
 /* parse handle / name / any youtube link */
 function parseInput(raw){
@@ -526,7 +552,8 @@ async function getChannelData(input,onProgress){
   const key='ch:'+p.value.toLowerCase();
   const cached=readCache(key); if(cached){ onProgress&&onProgress(100,'Loaded from cache'); return cached; }
   onProgress&&onProgress(30,'Locating channel…');
-  const html=await fetchText(p.url, t=>/og:title|ytInitialData|"channelId"/.test(t));
+  // require a real channel id in the page — rejects YouTube's consent wall (which has none)
+  const html=await fetchText(p.url, t=>/UC[\w-]{22}/.test(t));
   onProgress&&onProgress(60,'Grabbing avatar & name…');
   const channelId=p.id||extractChannelId(html);
   const name=(meta(html,'og:title')||p.value).replace(/ - YouTube$/,'');
@@ -692,7 +719,8 @@ async function doLoad(){
   catch(e){ ch=null; }
   if(!ch || (!ch.avatar && !(ch.videos&&ch.videos.length))){
     ch=ch||{name:v.replace(/^@/,''),handle:v.replace(/^@/,''),avatar:null,videos:[]};
-    err.textContent="Couldn't auto-grab everything — using what we found. You can still test fully.";
+    err.innerHTML=customProxy()?"Couldn't auto-grab everything — using what we found.":"Couldn't fetch fully. For big channels, add a free proxy below ↓";
+    if(!customProxy()) $('advBox').open=true;
   }
   state.channel=ch; localStorage.setItem(LS_CH,JSON.stringify(ch));
   if(ch.handle) upsertRecent(LS_RECENT_HANDLE,ch);
@@ -714,7 +742,7 @@ async function addCompetitor(input){
     toast(`Added ${data.name}`);
   }catch(e){
     state.competitors=state.competitors.filter(c=>c!==entry);
-    toast("Couldn't load that channel — check the handle", false);
+    toast(customProxy()?"Couldn't load that channel — check the handle":"Large channels need a proxy — see “Change” → Add a free proxy", false);
   }
   saveCompetitors(); renderCompList(); render();
 }
@@ -821,6 +849,8 @@ function makeSuggest(input,panel,key,onPick){
   updateCount();
   makeSuggest($('handleInput'),$('handleSuggest'),LS_RECENT_HANDLE,h=>{ $('handleInput').value=h; doLoad(); });
   makeSuggest($('compInput'),$('compSuggest'),LS_RECENT_COMP,h=>{ $('compInput').value=''; addCompetitor(h); });
+  const px=$('proxyInput'); px.value=customProxy(); if(px.value) $('advBox').open=true;
+  px.addEventListener('change',()=>{ const v=px.value.trim().replace(/\/+$/,''); px.value=v; localStorage.setItem(LS_PROXY,v); if(v){ readCacheClear(); toast('Proxy saved — channels will load reliably now'); } });
   if(localStorage.getItem(LS_SHORTS)==='0'){ state.excludeShorts=false; const b=$('shortsToggle'); b.classList.remove('on'); b.setAttribute('aria-checked','false'); }
   try{ const c=localStorage.getItem(LS_COMP); if(c) state.competitors=JSON.parse(c); }catch(e){}
   const saved=localStorage.getItem(LS_CH);
